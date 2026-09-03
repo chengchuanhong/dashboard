@@ -1,0 +1,50 @@
+[
+  {
+    "account": "chengcheng",
+    "s": "8b348aef9df925e8d47bb8147bc912e7",
+    "passwordHash": "65fed6c65d9c1bb8c20f8c0b71bbe4ec857fefe75b12344c75b64f00e14167e1",
+    "name": "chengcheng",
+    "dashboards": [
+      "ziyang",
+      "pip",
+      "shengyue",
+      "weekly",
+      "hrbp-web",
+      "hr",
+      "shengyue-fengkong"
+    ]
+  },
+  {
+    "account": "yangnan",
+    "s": "44a72694820ee5cb1cef534a46f14e13",
+    "passwordHash": "8d5d0471315d8f93cee31ca0072d038b8404de3484eb4a8f19b25cd620ca1928",
+    "name": "yangnan",
+    "dashboards": [
+      "ziyang",
+      "pip",
+      "shengyue",
+      "weekly",
+      "shengyue-fengkong"
+    ]
+  },
+  {
+    "account": "xiaoyingbing",
+    "s": "99877253d32e8a698b903671864d658b",
+    "passwordHash": "6039365d36118f0ecfe68411d5ced01751a8d52f140dc318f39075ea474ae7b8",
+    "name": "xiaoyingbing",
+    "dashboards": [
+      "shengyue",
+      "shengyue-fengkong"
+    ]
+  },
+  {
+    "account": "zhaochunhong",
+    "s": "b4e3252b36471f9c140da9547f884e62",
+    "passwordHash": "485d93026b6a58d5991ece7dfd4c7f021e6a4edd03869c8c3bd3da2ec297bbbd",
+    "name": "zhaochunhong",
+    "dashboards": [
+      "shengyue",
+      "shengyue-fengkong"
+    ]
+  }
+]

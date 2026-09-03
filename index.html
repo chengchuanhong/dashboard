@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>极星CC — 数据看板门户</title>
+<script>
+// 门户自动更新：检测 portal_version.json，版本不符则强制回源刷新（绕过 CDN/浏览器缓存，用户零操作）
+(function(){
+  try {
+    var PORTAL_VERSION = "v12-20260902-2115";
+    fetch('portal_version.json?_=' + Date.now(), {cache:'no-store'})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (d && d.version && d.version !== PORTAL_VERSION) {
+          var u = new URL(location.href);
+          // 若 URL 上已带同一版本戳，不再重定向，避免循环抖动
+          if (u.searchParams.get('_pv') === d.version) return;
+          u.searchParams.set('_pv', d.version);
+          location.replace(u.toString());
+        }
+      }).catch(function(){});
+  } catch(e) {}
+})();
+</script>
+<script>
+/* ===== v10: CloudBase 访客监控埋点（无感上报 · 静默失败 · 不影响门户功能）===== */
+window.__CC_TCB_ENV__ = 'dashboard-monitor-d4dhrp40688dae';
+window.__ccLogVisit = function(action, detail, user){ (window.__ccQueue = window.__ccQueue || []).push([action, detail, user]); };
+window.__ccOnTcb = function(cb){ if(window.__ccTcbApp) cb(window.__ccTcbApp); else (window.__ccTcbWaiters = window.__ccTcbWaiters || []).push(cb); };
+window.__ccLogVisit('打开页面', '门户首页');
+(function(){
+  try{
+    if(location.protocol === 'file:') return; /* 本地 file:// 打开不上报 */
+    var s = document.createElement('script');
+    s.src = 'https://static.cloudbase.net/cloudbase-js-sdk/3.9.1/cloudbase.full.js';
+    s.onload = function(){
+      try{
+        var app = cloudbase.init({ env: window.__CC_TCB_ENV__ });
+        app.auth({ persistence: 'local' }).signInAnonymously().then(function(){
+          window.__ccTcbApp = app;
+          window.__ccLogVisit = function(action, detail, user){
+            try{
+              app.callFunction({ name:'logVisit', data:{
+                action:String(action||''), detail:String(detail||''),
+                user:String(user||''),
+                page:location.pathname, ref:document.referrer||''
+              }});
+            }catch(e){}
+          };
+          var ws = window.__ccTcbWaiters || []; window.__ccTcbWaiters = [];
+          for(var i=0;i<ws.length;i++){ try{ ws[i](app); }catch(e){} }
+          var q = window.__ccQueue || []; window.__ccQueue = [];
+          for(var j=0;j<q.length;j++){ try{ window.__ccLogVisit(q[j][0], q[j][1], q[j][2]); }catch(e){} }
+        }).catch(function(){ /* 匿名登录失败：安全域名未配置 / 离线，静默 */ });
+      }catch(e){}
+    };
+    s.onerror = function(){ /* 静默 */ };
+    (document.head || document.documentElement).appendChild(s);
+    setInterval(function(){ try{ window.__ccLogVisit('心跳','门户'); }catch(e){} }, 60000);
+  }catch(e){}
+})();
+</script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #0d1117;
+    color: #c9d1d9;
+    min-height: 100vh;
+  }
+
+  /* ===== 登录页 ===== */
+  #loginPage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .login-box {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 48px 40px;
+    width: 380px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  }
+  .login-box h1 {
+    text-align: center;
+    font-size: 22px;
+    color: #58a6ff;
+    margin-bottom: 8px;
+  }
+  .login-box .subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #8b949e;
+    margin-bottom: 32px;
+  }
+  .login-box label {
+    display: block;
+    font-size: 13px;
+    color: #8b949e;
+    margin-bottom: 6px;
+  }
+  .login-box input {
+    width: 100%;
+    padding: 10px 14px;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    color: #c9d1d9;
+    font-size: 15px;
+    margin-bottom: 18px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .login-box input:focus {
+    border-color: #58a6ff;
+  }
+  .login-box button {
+    width: 100%;
+    padding: 11px;
+    background: #238636;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .login-box button:hover { background: #2ea043; }
+  .login-err {
+    color: #f85149;
+    font-size: 13px;
+    text-align: center;
+    margin-top: 12px;
+    display: none;
+  }
+
+  /* ===== 主页面 ===== */
+  #mainPage { display: none; }
+
+  .header {
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header h1 {
+    font-size: 18px;
+    color: #58a6ff;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .header-user {
+    font-size: 14px;
+    color: #8b949e;
+  }
+  .header-user span { color: #c9d1d9; font-weight: 600; }
+  .btn-logout {
+    background: none;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .btn-logout:hover { border-color: #f85149; color: #f85149; }
+
+  .page-body {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 32px;
+  }
+  .welcome {
+    font-size: 15px;
+    color: #8b949e;
+    margin-bottom: 28px;
+  }
+  .welcome strong { color: #c9d1d9; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  .card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 28px 24px;
+    cursor: pointer;
+    transition: border-color .2s, transform .15s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .card:hover {
+    border-color: #58a6ff;
+    transform: translateY(-3px);
+  }
+  .card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #c9d1d9;
+    margin-bottom: 6px;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: #8b949e;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .card-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: #8b949e;
+  }
+  .card-meta .tag {
+    background: #21262d;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .empty-msg {
+    text-align: center;
+    color: #8b949e;
+    font-size: 15px;
+    padding: 60px 0;
+    grid-column: 1 / -1;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 32px;
+    font-size: 12px;
+    color: #484f58;
+    border-top: 1px solid #21262d;
+    margin-top: 48px;
+  }
+
+  /* ===== v10 管理日志（仅管理员 chengcheng 可见）===== */
+  .pl-entry-btn { background:none; border:1px solid #30363d; color:#8b949e; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:13px; }
+  .pl-entry-btn:hover { border-color:#58a6ff; color:#58a6ff; }
+  .pl-section-label { font-size:15px; font-weight:600; color:#58a6ff; margin:44px 0 4px; }
+  .pl-section-label .pl-hint { font-size:12px; font-weight:400; color:#8b949e; margin-left:8px; }
+  .pl-topbar { display:flex; align-items:center; gap:14px; margin:4px 0 14px; }
+  .pl-topbar-title { font-size:18px; font-weight:700; color:#e6edf3; }
+  .pl-topbar-title .pl-hint { font-size:12px; font-weight:400; color:#8b949e; margin-left:8px; }
+  .pl-subnav { display:flex; gap:8px; margin:12px 0 16px; flex-wrap:wrap; }
+  .pl-subnav button { background:#21262d; border:1px solid #30363d; color:#c9d1d9; padding:7px 14px; border-radius:6px; cursor:pointer; font-size:13px; }
+  .pl-subnav button:hover { border-color:#58a6ff; }
+  .pl-subnav button.pl-active { background:#1f6feb; border-color:#1f6feb; color:#fff; }
+  .pl-card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:20px 22px; margin-bottom:16px; }
+  .pl-card-title { font-size:15px; font-weight:600; color:#c9d1d9; margin-bottom:14px; display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+  .pl-card-title .pl-hint { font-size:12px; font-weight:400; color:#8b949e; }
+  .pl-kpi { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .pl-kpi .tile { background:#0d1117; border:1px solid #30363d; border-radius:8px; padding:14px; }
+  .pl-kpi .tile .lb { font-size:12px; color:#8b949e; margin-bottom:6px; }
+  .pl-kpi .tile .vl { font-size:22px; font-weight:700; color:#c9d1d9; }
+  .pl-kpi .tile.t-blue .vl { color:#58a6ff; }
+  .pl-kpi .tile.t-green .vl { color:#3fb950; }
+  .pl-kpi .tile.t-red .vl { color:#f85149; }
+  .pl-kpi .tile.t-purple .vl { color:#bc8cff; }
+  .pl-tbl-wrap { max-height:420px; overflow-y:auto; border:1px solid #30363d; border-radius:8px; }
+  .pl-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .pl-table th { position:sticky; top:0; background:#161b22; color:#8b949e; font-weight:600; text-align:left; padding:10px 12px; border-bottom:1px solid #30363d; z-index:1; }
+  .pl-table td { padding:9px 12px; border-bottom:1px solid #21262d; color:#c9d1d9; text-align:left; }
+  .pl-tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:12px; }
+  .pl-tag.g { background:rgba(63,185,80,.15); color:#3fb950; }
+  .pl-tag.r { background:rgba(248,81,73,.15); color:#f85149; }
+  .pl-tag.n { background:#21262d; color:#8b949e; }
+  .pl-btn { background:#21262d; border:1px solid #30363d; color:#c9d1d9; padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px; }
+  .pl-btn:hover { border-color:#58a6ff; }
+  .pl-btn.danger { background:rgba(248,81,73,.12); border-color:#f85149; color:#f85149; }
+  .pl-btn.primary { background:#1f6feb; border-color:#1f6feb; color:#fff; }
+  .pl-note { color:#8b949e; font-size:12px; margin-top:10px; line-height:1.7; }
+  .pl-input { padding:8px 12px; background:#0d1117; border:1px solid #30363d; border-radius:6px; color:#c9d1d9; font-size:13px; outline:none; }
+  .pl-input:focus { border-color:#58a6ff; }
+  .pl-form-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
+  .pl-dash-checks { display:flex; gap:12px; flex-wrap:wrap; margin:4px 0 12px; font-size:12px; color:#c9d1d9; }
+  .pl-dash-checks label { display:flex; align-items:center; gap:4px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<!-- 登录页 -->
+<div id="loginPage">
+  <div class="login-box">
+    <h1>🟦 数据看板门户</h1>
+    <p class="subtitle">极星CC · 请输入账号密码</p>
+    <label>账号</label>
+    <input type="text" id="loginAccount" placeholder="请输入账号" autocomplete="username">
+    <label>密码</label>
+    <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password">
+    <button onclick="doLogin()">登 录</button>
+    <p class="login-err" id="loginErr">账号或密码错误</p>
+  </div>
+</div>
+
+<!-- 主页面 -->
+<div id="mainPage">
+  <div class="header">
+    <h1>🟦 数据看板门户</h1>
+    <div class="header-right">
+      <button class="pl-entry-btn" id="adminLogEntryBtn" style="display:none" onclick="plToggleAdminLog()">🛠 管理日志</button>
+      <div class="header-user">当前用户：<span id="currentUser"></span></div>
+      <button class="btn-logout" onclick="doLogout()">退出登录</button>
+    </div>
+  </div>
+  <div class="page-body">
+    <div id="plMainView">
+      <p class="welcome" id="welcomeMsg"></p>
+      <div class="grid" id="dashboardGrid"></div>
+    </div>
+
+    <!-- ===== v10: 管理日志（仅管理员 chengcheng 可见，独立页面视图）===== -->
+    <div id="adminLogSection" style="display:none">
+      <div class="pl-topbar">
+        <button class="pl-btn" onclick="plToggleAdminLog()">← 返回门户</button>
+        <span class="pl-topbar-title">🛠 管理日志 <span class="pl-hint">仅管理员（chengcheng）可见</span></span>
+      </div>
+      <div class="pl-subnav">
+        <button id="plBtn_login" onclick="plSwitchView('login')">🔐 账号访问 / 登录记录</button>
+        <button id="plBtn_version" onclick="plSwitchView('version')">📌 版本迭代记录</button>
+        <button id="plBtn_perm" onclick="plSwitchView('perm')">🔑 权限管理</button>
+      </div>
+
+      <!-- 登录记录 -->
+      <div id="plView_login">
+        <div class="pl-card">
+          <div class="pl-card-title">📊 概览</div>
+          <div class="pl-kpi" id="plLoginKpi"></div>
+        </div>
+        <div class="pl-card">
+          <div class="pl-card-title">📋 登录明细
+            <span style="margin-left:auto;display:flex;gap:8px">
+              <button class="pl-btn" onclick="plRenderLoginLog()">🔄 刷新</button>
+              <button class="pl-btn danger" onclick="plClearLog()">🗑 清除记录</button>
+            </span>
+          </div>
+          <div class="pl-tbl-wrap">
+            <table class="pl-table">
+              <thead><tr><th style="min-width:160px">登录时间</th><th>账号</th><th>结果</th><th style="min-width:220px">设备 / 浏览器</th></tr></thead>
+              <tbody id="plLoginTbody"><tr><td colspan="4">加载中...</td></tr></tbody>
+            </table>
+          </div>
+          <p class="pl-note">⚠️ 说明：本门户为纯静态站点（GitHub Pages），无服务器端日志。上述记录保存在<strong>当前浏览器本地（localStorage）</strong>，仅反映本机/本浏览器的登录情况，<strong>不同设备、不同浏览器之间不互通</strong>。跨设备审计已由 CloudBase 埋点覆盖（登录成功 / 失败均上报云端，可在梓洋看板「实时访客监控」查看）。</p>
+        </div>
+      </div>
+
+      <!-- 版本迭代记录 -->
+      <div id="plView_version" style="display:none">
+        <div class="pl-card">
+          <div class="pl-card-title">📌 版本迭代记录 <span class="pl-hint">门户功能演进 / 上线时间（仅管理员可见）</span></div>
+          <div class="pl-tbl-wrap" style="max-height:480px">
+            <table class="pl-table">
+              <thead><tr><th style="min-width:140px">版本</th><th style="min-width:120px">上线时间</th><th>板块 / 内容调整</th></tr></thead>
+              <tbody id="plVersionTbody"><tr><td colspan="3">加载中...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 权限管理 -->
+      <div id="plView_perm" style="display:none">
+        <div class="pl-card">
+          <div class="pl-card-title">🔑 权限管理 <span class="pl-hint">账号名单 / 新增授权 / 取消授权</span>
+            <span style="margin-left:auto;display:flex;gap:8px">
+              <button class="pl-btn" onclick="plRenderPerm()">🔄 刷新</button>
+              <button class="pl-btn" onclick="plExportConfig()">📤 导出配置</button>
+              <button class="pl-btn" onclick="plResetOverride()">♻️ 还原为源码名单</button>
+            </span>
+          </div>
+          <div class="pl-kpi" id="plPermKpi"></div>
+          <p class="pl-note">⚠️ 重要说明：本门户为纯静态站点（GitHub Pages，无后端），账号名单写死在页面源码中，密码以 SHA-256 哈希保存，<strong>无法还原明文、也无法查看</strong>（只能重置）。下方所有改动保存在<strong>当前浏览器本地（localStorage）</strong>：<strong>立即生效且刷新不丢失</strong>，但<strong>换设备 / 换浏览器不生效</strong>。如需全网生效，请点「📤 导出配置」把 JSON 交给看板维护者更新 portal_users.json（v12 起支持：部署后所有设备与各看板门禁同步生效）。你以 chengcheng 身份登录时已通过密码验证，故无需二次验证。</p>
+        </div>
+        <div class="pl-card">
+          <div class="pl-card-title">➕ 新增账号</div>
+          <div class="pl-form-row">
+            <input class="pl-input" id="plNewAcc" placeholder="账号名（2-24位字母数字）" style="min-width:200px">
+            <input class="pl-input" id="plNewPwd" type="password" placeholder="密码（至少4位）" style="min-width:160px">
+            <input class="pl-input" id="plNewPwd2" type="password" placeholder="确认密码" style="min-width:160px">
+            <button class="pl-btn primary" onclick="plAddUser()">➕ 新增</button>
+          </div>
+          <div style="font-size:12px;color:#8b949e;margin-bottom:2px">可查看的看板（默认全选）：</div>
+          <div class="pl-dash-checks" id="plNewDashChecks"></div>
+        </div>
+        <div class="pl-card">
+          <div class="pl-card-title">👤 账号名单</div>
+          <div class="pl-tbl-wrap">
+            <table class="pl-table">
+              <thead><tr><th style="min-width:130px">账号</th><th style="min-width:80px">角色</th><th style="min-width:120px">密码</th><th style="min-width:90px">可看看板</th><th style="min-width:90px">来源</th><th style="min-width:80px">状态</th><th style="min-width:230px">操作</th></tr></thead>
+              <tbody id="plPermTbody"><tr><td colspan="7">加载中...</td></tr></tbody>
+            </table>
+          </div>
+          <div id="plExportWrap" style="display:none;margin-top:12px">
+            <div style="font-size:12px;color:#8b949e;margin-bottom:6px">下面是当前生效的账号配置（JSON）。发给维护者写回源码 USERS 数组即可全网生效（新增账号为无盐 SHA-256，与源码格式一致）。</div>
+            <textarea id="plExportBox" readonly style="width:100%;height:160px;padding:9px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;font-size:11px;font-family:ui-monospace,Menlo,Consolas,monospace;resize:vertical"></textarea>
+            <div style="margin-top:8px;display:flex;gap:8px">
+              <button class="pl-btn" onclick="plDownloadConfig()">⬇️ 下载 JSON</button>
+              <button class="pl-btn" onclick="document.getElementById('plExportWrap').style.display='none'">收起</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">极星CC · 数据看板门户 · 仅限内部使用</div>
+</div>
+
+<script>
+// ============================================================
+//  【配置区】新增用户/看板只需修改以下两个数组
+// ============================================================
+
+// 看板列表（新增看板在这里加对象）
+const DASHBOARDS = [
+  {
+    id: "ziyang",
+    title: "梓洋L1数据分析看板",
+    desc: "承载量、转化率、ROI等核心指标，覆盖全营期数据",
+    icon: "📊",
+    iconColor: "#238636",
+    url: "https://chengchuanhong.github.io/dashboard/dashboard.html?v=202609032003",
+    version: "v268-eval-v58",
+    date: "2026-09-03"
+  },
+  {
+    id: "pip",
+    title: "PIP评估看板",
+    desc: "PIP考核评估数据，9个维度综合分析",
+    icon: "📋",
+    iconColor: "#8957e5",
+    url: "https://chengchuanhong.github.io/dashboard/pip.html",
+    version: "v5.154",
+    date: "2026-09-03"
+  },
+  {
+    id: "shengyue",
+    title: "声乐数据看板",
+    desc: "声乐项目数据看板，覆盖营期77-192",
+    icon: "🎵",
+    iconColor: "#d29922",
+    url: "https://chengchuanhong.github.io/dashboard/shengyue.html",
+    version: "v3.2",
+    date: "2026-09-03"
+  },
+  {
+    id: "weekly",
+    title: "周报业绩模板",
+    desc: "周报数据看板，含ROI/产值/新人/架构等模块",
+    icon: "📝",
+    iconColor: "#58a6ff",
+    url: "https://chengchuanhong.github.io/dashboard/周报业绩模板.html",
+    version: "v4.3.36",
+    date: "2026-08-28"
+  },
+  {
+    id: "hrbp-web",
+    title: "极星组 Y26H1 述职汇报 — 网页版",
+    desc: "HRBP半年度述职互动数据故事，翻页式看板保留全部交互",
+    icon: "🏆",
+    iconColor: "#E24B4A",
+    url: "https://chengchuanhong.github.io/dashboard/CC-H1-review.html",
+    version: "v1.154",
+    date: "2026-07-26"
+  },
+  {
+    id: "hr",
+    title: "人事人员变动看板",
+    desc: "在职/离职/考勤多维度分析，支持5级组织架构筛选与日维度时间取数",
+    icon: "👥",
+    iconColor: "#39c5cf",
+    url: "https://chengchuanhong.github.io/dashboard/hr_dashboard.html",
+    version: "v2.2",
+    date: "2026-08-18"
+  },
+  {
+    id: "shengyue-fengkong",
+    title: "声乐风控数据分析",
+    desc: "账号封禁风控归因与多项目对比，上传CSV即可本地自动分析",
+    icon: "🛡️",
+    iconColor: "#e34c26",
+    url: "https://chengchuanhong.github.io/dashboard/shengyue-fengkong.html",
+    version: "v9",
+    date: "2026-08-20"
+  },
+  // 【新增看板示例】复制上面一段，修改 id/title/desc/url/version/date 即可
+  // {
+  //   id: "newboard",
+  //   title: "新看板名称",
+  //   desc: "看板描述",
+  //   icon: "📈",
+  //   iconColor: "#d29922",
+  //   url: "https://...",
+  //   version: "v1.0",
+  //   date: "2026-06-14"
+  // },
+];
+
+// 用户列表（新增用户在这里加对象）
+// 安全加固 2026-09-03：passwordHash = SHA256(s + 密码)，s 为该账号随机盐，二者必须成对填写。
+// ⚠️ 严禁在任何注释里写下密码明文——注释随源码公开发布，等同于公开密码。
+// 初始 demo 账号：
+//   账号: admin  密码: 123456
+//   账号: user1  密码: abcd
+const USERS = [
+  {
+    account: "chengcheng",
+    // SHA-256(salt + password)，salt 见同对象 s 字段
+    s: "8b348aef9df925e8d47bb8147bc912e7", passwordHash: "65fed6c65d9c1bb8c20f8c0b71bbe4ec857fefe75b12344c75b64f00e14167e1",
+    name: "chengcheng",
+    dashboards: ["ziyang", "pip", "shengyue", "weekly", "hrbp-web", "hr", "shengyue-fengkong"]
+  },
+  {
+    account: "yangnan",
+    // SHA-256(salt + password)，salt 见同对象 s 字段
+    s: "44a72694820ee5cb1cef534a46f14e13", passwordHash: "8d5d0471315d8f93cee31ca0072d038b8404de3484eb4a8f19b25cd620ca1928",
+    name: "yangnan",
+    dashboards: ["ziyang", "pip", "shengyue", "weekly", "shengyue-fengkong"]
+  },
+  {
+    account: "xiaoyingbing",
+    // SHA-256(salt + password)，salt 见同对象 s 字段
+    s: "99877253d32e8a698b903671864d658b", passwordHash: "6039365d36118f0ecfe68411d5ced01751a8d52f140dc318f39075ea474ae7b8",
+    name: "xiaoyingbing",
+    dashboards: ["shengyue", "shengyue-fengkong"]
+  },
+  {
+    account: "zhaochunhong",
+    // SHA-256(salt + password)，salt 见同对象 s 字段
+    s: "b4e3252b36471f9c140da9547f884e62", passwordHash: "485d93026b6a58d5991ece7dfd4c7f021e6a4edd03869c8c3bd3da2ec297bbbd",
+    name: "zhaochunhong",
+    dashboards: ["shengyue", "shengyue-fengkong"]
+  }
+  // 【新增用户示例】复制上面一段，修改 account/passwordHash/name/dashboards 即可
+  // 生成方法：在浏览器控制台执行 await plHash("你的密码")，把返回的 s / h 分别填入
+  // {
+  //   account: "新账号",
+  //   passwordHash: "密码的SHA256哈希值",
+  //   name: "显示名称",
+  //   dashboards: ["ziyang", "pip"]
+  // },
+];
+
+// ============================================================
+//  以下为逻辑代码，一般无需修改
+// ============================================================
+
+function sha256(str) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  return crypto.subtle.digest("SHA-256", data).then(hash => {
+    return Array.from(new Uint8Array(hash))
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
+  });
+}
+
+let currentUser = null;
+
+async function doLogin() {
+  const account = document.getElementById("loginAccount").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  const errEl = document.getElementById("loginErr");
+
+  if (!account || !password) {
+    errEl.textContent = "请输入账号和密码";
+    errEl.style.display = "block";
+    return;
+  }
+
+  // 安全加固 2026-09-03：加盐校验 h = SHA256(salt + password)，源码内不再出现明文
+  // v10: 账号表 = 源码名单 + 本机权限管理覆盖层（新增/停用/改密立即生效）
+  const eff = (typeof plEffectiveUsers === "function") ? plEffectiveUsers() : null;
+  const effUser = eff ? eff[account] : null;
+  const srcUser = (effUser && !effUser.disabled) ? effUser
+                : USERS.find(u => u.account === account) || null;
+  const hash = srcUser ? await sha256((srcUser.s || "") + password) : null;
+  const user = (srcUser && hash && hash === srcUser.passwordHash)
+    ? { account: srcUser.account, s: srcUser.s || "", passwordHash: srcUser.passwordHash, name: srcUser.name || srcUser.account, dashboards: (srcUser.dashboards || []).slice() }
+    : null;
+
+  if (!user) {
+    plRecordLogin(account, false);                                   // v10: 记录失败尝试
+    try { if (window.__ccLogVisit) window.__ccLogVisit("登录失败", account); } catch(e) {}
+    errEl.textContent = "账号或密码错误";
+    errEl.style.display = "block";
+    return;
+  }
+
+  currentUser = user;
+  sessionStorage.setItem("portal_user", JSON.stringify(user));
+  plRecordLogin(user.account, true);                                 // v10: 记录成功登录
+  try { if (window.__ccLogVisit) window.__ccLogVisit("登录成功", "门户", user.account); } catch(e) {}
+  if (user.account === PORTAL_ADMIN) plPermUnlocked = true;          // v10: 管理员登录自动通过权限闸门
+  showMainPage(user);
+}
+
+function doLogout() {
+  currentUser = null;
+  sessionStorage.removeItem("portal_user");
+  document.getElementById("mainPage").style.display = "none";
+  document.getElementById("loginPage").style.display = "flex";
+  document.getElementById("loginAccount").value = "";
+  document.getElementById("loginPassword").value = "";
+  document.getElementById("loginErr").style.display = "none";
+}
+
+function showMainPage(user) {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("mainPage").style.display = "block";
+  document.getElementById("currentUser").textContent = user.name;
+  document.getElementById("welcomeMsg").innerHTML =
+    `欢迎回来，<strong>${user.name}</strong>！以下是你有权限查看的数据看板：`;
+  // v10: 仅管理员可见「管理日志」入口
+  const adminBtn = document.getElementById("adminLogEntryBtn");
+  if (adminBtn) adminBtn.style.display = (user.account === PORTAL_ADMIN) ? "inline-block" : "none";
+  const adminSec = document.getElementById("adminLogSection");
+  if (adminSec) adminSec.style.display = "none";
+
+  const grid = document.getElementById("dashboardGrid");
+  grid.innerHTML = "";
+
+  const allowed = DASHBOARDS.filter(d => user.dashboards.includes(d.id));
+
+  if (allowed.length === 0) {
+    grid.innerHTML = `<div class="empty-msg">暂无你有权限查看的看板，请联系管理员。</div>`;
+    return;
+  }
+
+  allowed.forEach(d => {
+    const card = document.createElement("a");
+    card.className = "card";
+    card.href = d.url;
+    card.target = "_blank";
+    card.rel = "noopener";
+    card.innerHTML = `
+      <div class="card-icon" style="background:${d.iconColor}22; color:${d.iconColor};">
+        ${d.icon}
+      </div>
+      <div class="card-title">${d.title}</div>
+      <div class="card-desc">${d.desc}</div>
+      <div class="card-meta">
+        <span class="tag">版本 ${d.version}</span>
+        <span class="tag">${d.date}</span>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// 回车键登录
+document.getElementById("loginPassword").addEventListener("keydown", e => {
+  if (e.key === "Enter") doLogin();
+});
+
+// ============================================================
+//  v10: 管理日志（仅管理员 chengcheng 可见）
+//  登录记录 / 版本迭代记录 / 权限管理 —— 参照梓洋看板同款实现
+// ============================================================
+const PORTAL_ADMIN = "chengcheng";
+const PORTAL_OV_KEY = "__PORTAL_USERS_OV__";
+const PORTAL_LOG_KEY = "__PORTAL_LOGIN_LOG__";
+let plPermUnlocked = false;   // chengcheng 登录成功时自动置 true（对应梓洋「本人登录自动通过」）
+let plPermRows = [];          // 当前渲染的账号下标表（onclick 按下标取，避免注入）
+let plVersionRows = [
+  { v: "v12-20260902", d: "2026-09-02", c: "权限管理新增 ✏️ 编辑按钮（老账号可直接改可见看板，无需删号重建）；新增 portal_users.json 全网账号名单（各看板门禁同源读取，导出配置交维护者部署即全网生效）；埋点修复：环境 ID 更正 + CloudBase SDK 固定 3.9.1 + 匿名登录新 API" },
+  { v: "v11-20260902", d: "2026-09-02", c: "权限管理操作按钮改为 4 个：⏸ 停用 / ✅ 恢复 / 🔑 改密 / 🗑 删除（不适用的按钮自动置灰，防误操作）" },
+  { v: "v10-20260902", d: "2026-09-02", c: "新增「管理日志」（登录记录 / 版本迭代 / 权限管理，仅 chengcheng 可见）；CloudBase 访客埋点（打开 / 登录 / 心跳上报云函数 logVisit）；PORTAL_VERSION 与 portal_version.json 统一（消除 _pv 后缀重定向）；梓洋卡片同步 v268-eval-v51" },
+  { v: "v9-20260828", d: "2026-08-28", c: "门户自动更新机制：检测 portal_version.json 版本不符自动强制刷新（绕过 CDN/浏览器缓存）" },
+];
+
+function plEsc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function plShortUA() {
+  var ua = navigator.userAgent || "";
+  var m = ua.match(/(Edge|Edg|Chrome|Firefox|Safari|Opera|QQBrowser|MicroMessenger)\/?\s*([\d.]+)/);
+  var b = m ? (m[1].replace("Edg", "Edge").replace("MicroMessenger", "微信") + (m[2] ? " " + m[2] : "")) : "未知浏览器";
+  var os = /Windows/.test(ua) ? "Windows" : /Mac/.test(ua) ? "macOS" : /iPhone|iPad/.test(ua) ? "iOS" : /Android/.test(ua) ? "Android" : /Linux/.test(ua) ? "Linux" : "未知系统";
+  return b + " · " + os;
+}
+function plFmtTs(ts) {
+  var d = new Date(ts);
+  function p(n) { return (n < 10 ? "0" : "") + n; }
+  return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) + " " + p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
+}
+
+// ── 登录日志（localStorage 本地记录）──
+function plRecordLogin(user, ok) {
+  try {
+    var log = JSON.parse(localStorage.getItem(PORTAL_LOG_KEY) || "[]");
+    if (!Array.isArray(log)) log = [];
+    log.unshift({ user: user, ok: !!ok, ts: Date.now(), dev: plShortUA() });
+    if (log.length > 500) log = log.slice(0, 500);
+    localStorage.setItem(PORTAL_LOG_KEY, JSON.stringify(log));
+  } catch (e) { /* 隐私模式等，忽略 */ }
+}
+function plLoadLog() {
+  try {
+    var l = JSON.parse(localStorage.getItem(PORTAL_LOG_KEY) || "[]");
+    return Array.isArray(l) ? l : [];
+  } catch (e) { return []; }
+}
+function plRenderLoginLog() {
+  var log = plLoadLog();
+  var tbody = document.getElementById("plLoginTbody");
+  var kpi = document.getElementById("plLoginKpi");
+  if (!tbody) return;
+  if (kpi) {
+    var okCnt = log.filter(r => r.ok).length;
+    var failCnt = log.length - okCnt;
+    var lastTs = log[0] ? plFmtTs(log[0].ts) : "—";
+    kpi.innerHTML =
+      '<div class="tile t-blue"><div class="lb">总记录</div><div class="vl">' + log.length + '</div></div>' +
+      '<div class="tile t-green"><div class="lb">成功登录</div><div class="vl">' + okCnt + '</div></div>' +
+      '<div class="tile t-red"><div class="lb">失败尝试</div><div class="vl">' + failCnt + '</div></div>' +
+      '<div class="tile t-purple"><div class="lb">最近活动</div><div class="vl" style="font-size:14px">' + lastTs + '</div></div>';
+  }
+  if (!log.length) {
+    tbody.innerHTML = '<tr><td colspan="4">暂无登录记录</td></tr>';
+    return;
+  }
+  var html = "";
+  for (var i = 0; i < log.length; i++) {
+    var r = log[i];
+    var badge = r.ok ? '<span class="pl-tag g">成功</span>' : '<span class="pl-tag r">失败</span>';
+    var userShow = r.user ? plEsc(r.user) : '<span style="color:#8b949e">（空）</span>';
+    html += '<tr><td>' + plFmtTs(r.ts) + '</td><td>' + userShow + '</td><td>' + badge + '</td><td>' + plEsc(r.dev || "未知设备") + '</td></tr>';
+  }
+  tbody.innerHTML = html;
+}
+function plClearLog() {
+  if (!confirm("确定要清除本浏览器保存的全部登录记录吗？此操作不可恢复。")) return;
+  try { localStorage.removeItem(PORTAL_LOG_KEY); plRenderLoginLog(); }
+  catch (e) { alert("清除失败：" + e.message); }
+}
+
+// ── 权限覆盖层 ──
+function plIsAdmin() { return !!(currentUser && currentUser.account === PORTAL_ADMIN); }
+function plLoadOv() {
+  try {
+    var o = JSON.parse(localStorage.getItem(PORTAL_OV_KEY) || "{}");
+    return (o && typeof o === "object" && !Array.isArray(o)) ? o : {};
+  } catch (e) { return {}; }
+}
+function plSaveOv(o) {
+  try { localStorage.setItem(PORTAL_OV_KEY, JSON.stringify(o)); return true; }
+  catch (e) { alert("保存失败：" + e.message); return false; }
+}
+// 合并「远端名单(portal_users.json) / 源码名单 + 本机覆盖」→ 当前实际生效账号表
+let plRemoteUsers = null;   // v12: portal_users.json 拉取成功后替代源码 USERS（全网生效的真源）
+function plRandHex(n) {
+  var a = new Uint8Array(n);
+  (window.crypto || window.msCrypto).getRandomValues(a);
+  var r = "";
+  for (var i = 0; i < n; i++) r += ("0" + a[i].toString(16)).slice(-2);
+  return r;
+}
+/* 安全加固 2026-09-03：新增/改密统一写入加盐哈希 {s, h} */
+async function plHash(pw) {
+  var s = plRandHex(16);
+  return { s: s, h: await sha256(s + pw) };
+}
+function plEffectiveUsers() {
+  var out = {};
+  (plRemoteUsers || USERS).forEach(u => {
+    out[u.account] = { account: u.account, s: u.s || "", passwordHash: u.passwordHash, name: u.name || u.account, dashboards: (u.dashboards || []).slice(), src: "source", disabled: false };
+  });
+  var ov = plLoadOv(), k;
+  for (k in ov) {
+    if (!Object.prototype.hasOwnProperty.call(ov, k)) continue;
+    var o = ov[k];
+    if (o && o.deleted) { delete out[k]; continue; }   // 取消权限（源码内置账号）
+    if (!out[k]) out[k] = { account: k, s: "", passwordHash: "", name: k, dashboards: [], src: "local", disabled: false };
+    if (o) {
+      if (o.s) out[k].s = o.s;
+      if (o.passwordHash) out[k].passwordHash = o.passwordHash;
+      if (o.name) out[k].name = o.name;
+      if (Array.isArray(o.dashboards)) out[k].dashboards = o.dashboards.slice();
+      if (typeof o.disabled === "boolean") out[k].disabled = o.disabled;
+    }
+  }
+  return out;
+}
+
+// v12: 拉取全网账号名单 portal_users.json（与各看板门禁同源读取；拉取失败则退回源码名单）
+(async function plFetchRemoteUsers() {
+  try {
+    var r = await fetch("portal_users.json?t=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) return;
+    var j = await r.json();
+    if (Array.isArray(j) && j.length && j.every(u => u && u.account && u.passwordHash)) {
+      plRemoteUsers = j;
+      if (typeof plRenderPerm === "function" && plPermUnlocked) plRenderPerm();
+    }
+  } catch (e) { /* 静默：拉取失败用源码名单兜底 */ }
+})();
+
+// ── 入口与子视图切换 ──
+function plToggleAdminLog() {
+  var sec = document.getElementById("adminLogSection");
+  var main = document.getElementById("plMainView");
+  var show = sec.style.display === "none";
+  sec.style.display = show ? "block" : "none";
+  if (main) main.style.display = show ? "none" : "block";
+  if (show) { plSwitchView("login"); window.scrollTo(0, 0); }
+}
+function plSwitchView(v) {
+  ["login", "version", "perm"].forEach(k => {
+    var el = document.getElementById("plView_" + k);
+    if (el) el.style.display = (k === v) ? "block" : "none";
+    var b = document.getElementById("plBtn_" + k);
+    if (b) b.classList.toggle("pl-active", k === v);
+  });
+  if (v === "login") plRenderLoginLog();
+  if (v === "version") plRenderVersion();
+  if (v === "perm") plRenderPerm();
+}
+
+// ── 版本迭代记录 ──
+function plRenderVersion() {
+  var tbody = document.getElementById("plVersionTbody");
+  if (!tbody) return;
+  var html = "";
+  for (var i = 0; i < plVersionRows.length; i++) {
+    var r = plVersionRows[i];
+    html += '<tr><td><strong>' + plEsc(r.v) + '</strong></td><td>' + plEsc(r.d) + '</td><td style="text-align:left">' + plEsc(r.c) + '</td></tr>';
+  }
+  tbody.innerHTML = html;
+}
+
+// ── 权限管理 ──
+function plFillDashChecks() {
+  var box = document.getElementById("plNewDashChecks");
+  if (!box || box.childElementCount) return;
+  DASHBOARDS.forEach(d => {
+    var lb = document.createElement("label");
+    lb.innerHTML = '<input type="checkbox" value="' + plEsc(d.id) + '" checked> ' + plEsc(d.title);
+    box.appendChild(lb);
+  });
+}
+function plRenderPerm() {
+  plFillDashChecks();
+  var users = plEffectiveUsers();
+  var names = Object.keys(users).sort();
+  var kpi = document.getElementById("plPermKpi");
+  var localCnt = names.filter(n => users[n].src === "local").length;
+  var disCnt = names.filter(n => users[n].disabled).length;
+  if (kpi) {
+    kpi.innerHTML =
+      '<div class="tile t-blue"><div class="lb">总账号</div><div class="vl">' + names.length + '</div></div>' +
+      '<div class="tile t-green"><div class="lb">正常</div><div class="vl">' + (names.length - disCnt) + '</div></div>' +
+      '<div class="tile t-red"><div class="lb">停用</div><div class="vl">' + disCnt + '</div></div>' +
+      '<div class="tile t-purple"><div class="lb">本机新增</div><div class="vl">' + localCnt + '</div></div>';
+  }
+  plPermRows = names.map(n => ({ name: n, u: users[n] }));
+  var tbody = document.getElementById("plPermTbody");
+  var html = "";
+  plPermRows.forEach((row, idx) => {
+    var n = row.name, u = row.u;
+    var role = (n === PORTAL_ADMIN) ? '<span class="pl-tag g">管理员</span>' : '<span class="pl-tag n">普通</span>';
+    var srcTag = (u.src === "local") ? '<span class="pl-tag n">本机新增</span>' : '<span class="pl-tag n">源码</span>';
+    var st = u.disabled ? '<span class="pl-tag r">已停用</span>' : '<span class="pl-tag g">正常</span>';
+    var ops;
+    if (n === PORTAL_ADMIN) {
+      ops = '<span class="pl-tag n">内置管理员不可修改</span>';
+    } else {
+      var disBtn = '<button class="pl-btn"' + (u.disabled ? ' disabled style="opacity:.35;cursor:not-allowed"' : '') + ' onclick="plPermAct(' + idx + ',\'disable\')">⏸ 停用</button> ';
+      var enaBtn = '<button class="pl-btn"' + (!u.disabled ? ' disabled style="opacity:.35;cursor:not-allowed"' : '') + ' onclick="plPermAct(' + idx + ',\'enable\')">✅ 恢复</button> ';
+      ops = disBtn + enaBtn +
+        '<button class="pl-btn" onclick="plPermAct(' + idx + ',\'pwd\')">🔑 改密</button> ' +
+        '<button class="pl-btn" onclick="plPermAct(' + idx + ',\'edit\')">✏️ 编辑</button> ' +
+        '<button class="pl-btn danger" onclick="plPermAct(' + idx + ',\'del\')">🗑 删除</button>';
+    }
+    html += '<tr><td>' + plEsc(n) + '</td><td>' + role + '</td><td>••••••（不可查看）</td><td>' + (u.dashboards || []).length + ' 个</td><td>' + srcTag + '</td><td>' + st + '</td><td>' + ops + '</td></tr>';
+  });
+  tbody.innerHTML = html || '<tr><td colspan="7">暂无账号</td></tr>';
+}
+async function plPermAct(idx, act) {
+  var row = plPermRows[idx];
+  if (!row) return;
+  var n = row.name, u = row.u;
+  if (n === PORTAL_ADMIN && act !== "noop") { alert("❌ 内置管理员 chengcheng 不可修改。"); return; }
+  if (act === "disable" || act === "enable") {
+    var ov = plLoadOv();
+    if (!ov[n]) ov[n] = {};
+    ov[n].disabled = (act === "disable");
+    if (plSaveOv(ov)) plRenderPerm();
+    return;
+  }
+  if (act === "edit") { plEditBoards(row); return; }
+  if (act === "pwd") {
+    var p1 = prompt("为账号「" + n + "」设置新密码（至少 4 位）：");
+    if (p1 === null) return;
+    if (p1.length < 4) { alert("密码至少 4 位，已取消。"); return; }
+    var p2 = prompt("请再次输入以确认：");
+    if (p2 === null) return;
+    if (p1 !== p2) { alert("两次输入不一致，已取消。"); return; }
+    var hObj = await plHash(p1);
+    var ov = plLoadOv();
+    if (!ov[n]) ov[n] = {};
+    ov[n].s = hObj.s;
+    ov[n].passwordHash = hObj.h;
+    if (plSaveOv(ov)) {
+      alert("✅ 密码已更新，立即生效（仅本浏览器）。\n如需全网生效，请点「📤 导出配置」交维护者部署。");
+      plRenderPerm();
+    }
+    return;
+  }
+  if (act === "del") {
+    if (!confirm("确定删除账号「" + n + "」的访问权限吗？\n删除后该账号将无法登录（仅影响本浏览器）。")) return;
+    var ov = plLoadOv();
+    if (u.src === "local") { delete ov[n]; } else { ov[n] = { deleted: true }; }
+    if (plSaveOv(ov)) plRenderPerm();
+    return;
+  }
+}
+
+// ── v12: 编辑账号可见看板 ──
+function plEditBoards(row) {
+  var n = row.name, u = row.u;
+  var cur = (u.dashboards || []).slice();
+  var box = document.getElementById("plEditBoardsBox");
+  if (!box) return;
+  var html = "";
+  DASHBOARDS.forEach(d => {
+    var on = cur.indexOf(d.id) >= 0 ? " checked" : "";
+    html += '<label style="display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:13.5px;color:#0f172a">'
+          + '<input type="checkbox" class="plEBChk" value="' + plEsc(d.id) + '"' + on + '> ' + plEsc(d.title) + '</label>';
+  });
+  box.innerHTML = html;
+  box.dataset.account = n;
+  var nameEl = document.getElementById("plEditBoardsName");
+  if (nameEl) nameEl.textContent = n;
+  var modal = document.getElementById("plEditBoardsModal");
+  if (modal) modal.style.display = "flex";
+}
+function plEditBoardsClose() {
+  var modal = document.getElementById("plEditBoardsModal");
+  if (modal) modal.style.display = "none";
+}
+async function plEditBoardsSave() {
+  var box = document.getElementById("plEditBoardsBox");
+  if (!box) return;
+  var n = box.dataset.account;
+  var sel = [];
+  box.querySelectorAll(".plEBChk").forEach(cb => { if (cb.checked) sel.push(cb.value); });
+  if (!sel.length) { alert("至少保留 1 个看板（如需全部收回，请用🗑删除账号）。"); return; }
+  var ov = plLoadOv();
+  if (!ov[n]) ov[n] = {};
+  ov[n].dashboards = sel;
+  if (plSaveOv(ov)) {
+    plEditBoardsClose();
+    plRenderPerm();
+    if (typeof currentUser !== "undefined" && currentUser && currentUser.account === n) {
+      try { currentUser.dashboards = sel.slice(); } catch (e) {}
+    }
+    alert("✅ 账号「" + n + "」可见看板已更新（本浏览器立即生效）。\n如需全网生效，请点「📤 导出配置」交维护者更新 portal_users.json。");
+  }
+}
+async function plAddUser() {
+  var accEl = document.getElementById("plNewAcc");
+  var pwEl = document.getElementById("plNewPwd");
+  var pw2El = document.getElementById("plNewPwd2");
+  var acc = (accEl.value || "").trim();
+  var pw = pwEl.value || "";
+  var pw2 = pw2El.value || "";
+  if (!acc) { alert("请填写账号名。"); return; }
+  if (!/^[A-Za-z0-9_.-]{2,24}$/.test(acc)) { alert("账号名只能包含字母、数字、下划线、点、连字符，长度 2-24 位。"); return; }
+  var eff = plEffectiveUsers();
+  if (eff[acc]) { alert("账号「" + acc + "」已存在，如需改密请用列表中的「🔑 改密」。"); return; }
+  if (pw.length < 4) { alert("密码至少 4 位。"); return; }
+  if (pw !== pw2) { alert("两次输入的密码不一致。"); return; }
+  var dbs = [];
+  document.querySelectorAll("#plNewDashChecks input:checked").forEach(cb => dbs.push(cb.value));
+  if (!dbs.length) { alert("请至少勾选一个可查看的看板。"); return; }
+  var hObj = await plHash(pw);
+  var ov = plLoadOv();
+  ov[acc] = { s: hObj.s, passwordHash: hObj.h, name: acc, dashboards: dbs, disabled: false };
+  if (!plSaveOv(ov)) return;
+  accEl.value = ""; pwEl.value = ""; pw2El.value = "";
+  document.querySelectorAll("#plNewDashChecks input").forEach(cb => cb.checked = true);
+  alert("✅ 账号「" + acc + "」已新增，立即生效（仅本浏览器）。\n如需全网生效，请点「📤 导出配置」交维护者部署。");
+  plRenderPerm();
+}
+function plResetOverride() {
+  if (!confirm("确定还原为源码内置账号名单吗？\n本机新增 / 停用 / 改密记录会全部清除（仅影响本浏览器）。")) return;
+  try { localStorage.removeItem(PORTAL_OV_KEY); } catch (e) {}
+  plRenderPerm();
+}
+function plBuildExport() {
+  var users = plEffectiveUsers();
+  var out = [];
+  Object.keys(users).sort().forEach(n => {
+    var u = users[n];
+    var row = { account: n, passwordHash: u.passwordHash, name: u.name, dashboards: (u.dashboards || []).slice() };
+    if (u.disabled) row.disabled = true;
+    out.push(row);
+  });
+  return JSON.stringify(out, null, 2);
+}
+function plExportConfig() {
+  var wrap = document.getElementById("plExportWrap");
+  var box = document.getElementById("plExportBox");
+  if (!wrap || !box) return;
+  box.value = plBuildExport();
+  wrap.style.display = "block";
+  try { navigator.clipboard.writeText(box.value); } catch (e) {}
+}
+function plDownloadConfig() {
+  var blob = new Blob([document.getElementById("plExportBox").value], { type: "application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "portal_users_config.json";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+}
+
+// 页面加载时检查是否已登录
+(function init() {
+  const saved = sessionStorage.getItem("portal_user");
+  if (saved) {
+    try {
+      currentUser = JSON.parse(saved);
+      // 每次刷新时从当前 USERS 重新同步 dashboards 列表，
+      // 这样新增看板后无需重新登录即可生效
+      // v10: 会话恢复时校验账号仍有效（覆盖层停用/删除则踢出）
+      if (typeof plEffectiveUsers === "function") {
+        const eff0 = plEffectiveUsers();
+        const chk = eff0[currentUser.account];
+        if (!chk || chk.disabled) { doLogout(); return; }
+        currentUser.dashboards = (chk.dashboards || []).slice();
+        if (currentUser.account === PORTAL_ADMIN) plPermUnlocked = true;
+      } else {
+        const fresh = USERS.find(u => u.account === currentUser.account);
+        if (fresh && fresh.dashboards) {
+          currentUser.dashboards = fresh.dashboards.slice();
+        }
+      }
+      sessionStorage.setItem("portal_user", JSON.stringify(currentUser));
+      showMainPage(currentUser);
+      return;
+    } catch(e) {}
+  }
+  document.getElementById("loginAccount").focus();
+})();
+</script>
+<!-- v12: 编辑可见看板对话框 -->
+<div id="plEditBoardsModal" style="display:none;position:fixed;inset:0;z-index:2147482000;background:rgba(15,23,42,.62);align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="background:#fff;border-radius:14px;padding:22px 24px;width:340px;max-height:82vh;overflow:auto;box-shadow:0 18px 60px rgba(0,0,0,.4)">
+    <div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:2px">✏️ 编辑可见看板</div>
+    <div style="font-size:12.5px;color:#64748b;margin-bottom:12px">账号：<b id="plEditBoardsName"></b></div>
+    <div id="plEditBoardsBox"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="pl-btn" style="flex:1" onclick="plEditBoardsSave()">💾 保存</button>
+      <button class="pl-btn" style="flex:1" onclick="plEditBoardsClose()">取消</button>
+    </div>
+    <div style="font-size:11.5px;color:#94a3b8;margin-top:10px;line-height:1.5">保存后本浏览器立即生效。如需全网生效（含各看板门禁），请「📤 导出配置」交维护者更新 portal_users.json。</div>
+  </div>
+</div>
+</body>
+</html>
+

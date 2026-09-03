@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0, s-maxage=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>极星CC · PIP考核看板</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
+display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f5f4f0;color:#2c2c2a}
+.boot{display:flex;flex-direction:column;align-items:center}
+.spinner{position:relative;width:52px;height:52px;margin-bottom:18px}
+.spinner span{position:absolute;top:0;left:0;right:0;bottom:0;border-radius:50%;border:3px solid transparent}
+.spinner span:nth-child(1){border-top-color:#4f8cf7;border-right-color:#4f8cf7;animation:spin 1s linear infinite}
+.spinner span:nth-child(2){top:10px;left:10px;right:10px;bottom:10px;border-bottom-color:#185fa5;border-left-color:#185fa5;animation:spin 1.5s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+p{font-size:14px;opacity:0.6;margin:0}
+.bar{width:180px;height:3px;border-radius:3px;background:#e0ded8;overflow:hidden;position:relative;margin-top:18px}
+.bar i{position:absolute;top:0;left:0;height:100%;width:38%;border-radius:3px;background:linear-gradient(90deg,#4f8cf7,#185fa5);animation:slide 1.15s ease-in-out infinite}
+@keyframes slide{0%{left:-40%}100%{left:100%}}
+</style>
+</head>
+<body>
+<div class="boot">
+  <div class="spinner"><span></span><span></span></div>
+  <p>正在加载看板…</p>
+  <div class="bar"><i></i></div>
+</div>
+<script>
+// ★ 核心：跳转到版本化文件，文件名每次不同 → 浏览器缓存彻底失效
+var target = 'pip_v5_154.html';
+var url = new URL(target, location.href);
+// 加时间戳参数双重保险
+url.searchParams.set('_ts', Date.now());
+location.replace(url.toString());
+</script>
+</body>
+</html>
