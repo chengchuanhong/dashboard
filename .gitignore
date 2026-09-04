@@ -1,0 +1,2 @@
+# patch_shell.js 生成的无 loader 原始密文备份，勿入 git
+*.bak-noloader
