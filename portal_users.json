@@ -46,5 +46,14 @@
       "shengyue",
       "shengyue-fengkong"
     ]
+  },
+  {
+    "account": "zhoutong",
+    "s": "707474c54625486e71f238eb314bc2ea",
+    "passwordHash": "2869def6037491cc3adf01f1e7a4e4b1880c919f631c983c8b0e0a1de973f757",
+    "name": "zhoutong",
+    "dashboards": [
+      "shengyue"
+    ]
   }
 ]

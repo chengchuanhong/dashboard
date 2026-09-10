@@ -552,6 +552,13 @@ const USERS = [
     s: "b4e3252b36471f9c140da9547f884e62", passwordHash: "485d93026b6a58d5991ece7dfd4c7f021e6a4edd03869c8c3bd3da2ec297bbbd",
     name: "zhaochunhong",
     dashboards: ["shengyue", "shengyue-fengkong"]
+  },
+  {
+    account: "zhoutong",
+    // SHA-256(salt + password)，salt 见同对象 s 字段
+    s: "707474c54625486e71f238eb314bc2ea", passwordHash: "2869def6037491cc3adf01f1e7a4e4b1880c919f631c983c8b0e0a1de973f757",
+    name: "zhoutong",
+    dashboards: ["shengyue"]
   }
   // 【新增用户示例】复制上面一段，修改 account/passwordHash/name/dashboards 即可
   // 生成方法：在浏览器控制台执行 await plHash("你的密码")，把返回的 s / h 分别填入
