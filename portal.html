@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>极星CC — 数据看板门户</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #0d1117;
+    color: #c9d1d9;
+    min-height: 100vh;
+  }
+
+  /* ===== 登录页 ===== */
+  #loginPage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  .login-box {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 48px 40px;
+    width: 380px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  }
+  .login-box h1 {
+    text-align: center;
+    font-size: 22px;
+    color: #58a6ff;
+    margin-bottom: 8px;
+  }
+  .login-box .subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #8b949e;
+    margin-bottom: 32px;
+  }
+  .login-box label {
+    display: block;
+    font-size: 13px;
+    color: #8b949e;
+    margin-bottom: 6px;
+  }
+  .login-box input {
+    width: 100%;
+    padding: 10px 14px;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    color: #c9d1d9;
+    font-size: 15px;
+    margin-bottom: 18px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .login-box input:focus {
+    border-color: #58a6ff;
+  }
+  .login-box button {
+    width: 100%;
+    padding: 11px;
+    background: #238636;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .login-box button:hover { background: #2ea043; }
+  .login-err {
+    color: #f85149;
+    font-size: 13px;
+    text-align: center;
+    margin-top: 12px;
+    display: none;
+  }
+
+  /* ===== 主页面 ===== */
+  #mainPage { display: none; }
+
+  .header {
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header h1 {
+    font-size: 18px;
+    color: #58a6ff;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .header-user {
+    font-size: 14px;
+    color: #8b949e;
+  }
+  .header-user span { color: #c9d1d9; font-weight: 600; }
+  .btn-logout {
+    background: none;
+    border: 1px solid #30363d;
+    color: #8b949e;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .btn-logout:hover { border-color: #f85149; color: #f85149; }
+
+  .page-body {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 32px;
+  }
+  .welcome {
+    font-size: 15px;
+    color: #8b949e;
+    margin-bottom: 28px;
+  }
+  .welcome strong { color: #c9d1d9; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  .card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 28px 24px;
+    cursor: pointer;
+    transition: border-color .2s, transform .15s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .card:hover {
+    border-color: #58a6ff;
+    transform: translateY(-3px);
+  }
+  .card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #c9d1d9;
+    margin-bottom: 6px;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: #8b949e;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+  .card-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: #8b949e;
+  }
+  .card-meta .tag {
+    background: #21262d;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  .empty-msg {
+    text-align: center;
+    color: #8b949e;
+    font-size: 15px;
+    padding: 60px 0;
+    grid-column: 1 / -1;
+  }
+
+  .footer {
+    text-align: center;
+    padding: 32px;
+    font-size: 12px;
+    color: #484f58;
+    border-top: 1px solid #21262d;
+    margin-top: 48px;
+  }
+</style>
+</head>
+<body>
+
+<!-- 登录页 -->
+<div id="loginPage">
+  <div class="login-box">
+    <h1>🟦 数据看板门户</h1>
+    <p class="subtitle">极星CC · 请输入账号密码</p>
+    <label>账号</label>
+    <input type="text" id="loginAccount" placeholder="请输入账号" autocomplete="username">
+    <label>密码</label>
+    <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password">
+    <button onclick="doLogin()">登 录</button>
+    <p class="login-err" id="loginErr">账号或密码错误</p>
+  </div>
+</div>
+
+<!-- 主页面 -->
+<div id="mainPage">
+  <div class="header">
+    <h1>🟦 数据看板门户</h1>
+    <div class="header-right">
+      <div class="header-user">当前用户：<span id="currentUser"></span></div>
+      <button class="btn-logout" onclick="doLogout()">退出登录</button>
+    </div>
+  </div>
+  <div class="page-body">
+    <p class="welcome" id="welcomeMsg"></p>
+    <div class="grid" id="dashboardGrid"></div>
+  </div>
+  <div class="footer">极星CC · 数据看板门户 · 仅限内部使用</div>
+</div>
+
+<script>
+// ============================================================
+//  【配置区】新增用户/看板只需修改以下两个数组
+// ============================================================
+
+// 看板列表（新增看板在这里加对象）
+const DASHBOARDS = [
+  {
+    id: "ziyang",
+    title: "梓洋L1数据分析看板",
+    desc: "承载量、转化率、ROI等核心指标，覆盖全营期数据",
+    icon: "📊",
+    iconColor: "#238636",
+    url: "https://chengchuanhong.github.io/dashboard/dashboard.html",
+    version: "v228",
+    date: "2026-06-14"
+  },
+  {
+    id: "pip",
+    title: "PIP评估看板",
+    desc: "PIP考核评估数据，9个维度综合分析",
+    icon: "📋",
+    iconColor: "#8957e5",
+    url: "https://chengchuanhong.github.io/dashboard/pip.html",
+    version: "v5.43-opt2",
+    date: "2026-06-14"
+  },
+  {
+    id: "shengyue",
+    title: "声乐数据看板",
+    desc: "声乐项目数据看板，覆盖营期77-192",
+    icon: "🎵",
+    iconColor: "#d29922",
+    url: "https://chengchuanhong.github.io/dashboard/shengyue.html",
+    version: "v3.2",
+    date: "2026-09-03"
+  },
+  {
+    id: "weekly",
+    title: "周报业绩模板",
+    desc: "周报数据看板，含ROI/产值/新人/架构等模块",
+    icon: "📝",
+    iconColor: "#58a6ff",
+    url: "https://chengchuanhong.github.io/dashboard/周报业绩模板_标准版v2.html",
+    version: "v3_Tableau",
+    date: "2026-06-23"
+  },
+  {
+    id: "hr",
+    title: "人事人员变动看板",
+    desc: "在职/离职/考勤多维度分析，支持5级组织架构筛选与日维度时间取数",
+    icon: "👥",
+    iconColor: "#39c5cf",
+    url: "https://chengchuanhong.github.io/dashboard/hr_dashboard.html",
+    version: "v2.2",
+    date: "2026-08-18"
+  }
+  // 【新增看板示例】复制上面一段，修改 id/title/desc/url/version/date 即可
+  // {
+  //   id: "newboard",
+  //   title: "新看板名称",
+  //   desc: "看板描述",
+  //   icon: "📈",
+  //   iconColor: "#d29922",
+  //   url: "https://...",
+  //   version: "v1.0",
+  //   date: "2026-06-14"
+  // },
+];
+
+// 用户列表（新增用户在这里加对象）
+// passwordHash 是密码的 SHA-256 哈希值，可用 https://www.xorbin.com/tools/sha256-hash-calculator 生成
+// 初始 demo 账号：
+//   （示例账号已移除，2026-09-03 安全加固）
+const USERS = [
+  {
+    account: "chengcheng",
+    passwordHash: "65fed6c65d9c1bb8c20f8c0b71bbe4ec857fefe75b12344c75b64f00e14167e1",
+    s: "8b348aef9df925e8d47bb8147bc912e7",
+    name: "chengcheng",
+    dashboards: ["ziyang", "pip", "shengyue", "weekly", "hr"]
+  },
+  {
+    account: "yangnan",
+    passwordHash: "8d5d0471315d8f93cee31ca0072d038b8404de3484eb4a8f19b25cd620ca1928",
+    s: "44a72694820ee5cb1cef534a46f14e13",
+    name: "yangnan",
+    dashboards: ["ziyang", "pip", "shengyue", "weekly"]
+  },
+  {
+    account: "xiaoyingbing",
+    passwordHash: "6039365d36118f0ecfe68411d5ced01751a8d52f140dc318f39075ea474ae7b8",
+    s: "99877253d32e8a698b903671864d658b",
+    name: "xiaoyingbing",
+    dashboards: ["shengyue"]
+  },
+  {
+    account: "zhaochunhong",
+    passwordHash: "485d93026b6a58d5991ece7dfd4c7f021e6a4edd03869c8c3bd3da2ec297bbbd",
+    s: "b4e3252b36471f9c140da9547f884e62",
+    name: "zhaochunhong",
+    dashboards: ["shengyue"]
+  }
+  // 【新增用户示例】复制上面一段，修改 account/passwordHash/name/dashboards 即可
+  // 生成 passwordHash 的方法：把密码字符串用在线工具算 SHA-256，把结果填进来
+  // {
+  //   account: "新账号",
+  //   passwordHash: "密码的SHA256哈希值",
+  //   name: "显示名称",
+  //   dashboards: ["ziyang", "pip"]
+  // },
+];
+
+// ============================================================
+//  以下为逻辑代码，一般无需修改
+// ============================================================
+
+function sha256(str) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  return crypto.subtle.digest("SHA-256", data).then(hash => {
+    return Array.from(new Uint8Array(hash))
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
+  });
+}
+
+let currentUser = null;
+
+async function doLogin() {
+  const account = document.getElementById("loginAccount").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  const errEl = document.getElementById("loginErr");
+
+  if (!account || !password) {
+    errEl.textContent = "请输入账号和密码";
+    errEl.style.display = "block";
+    return;
+  }
+
+  // 2026-09-03 安全加固：加盐校验 h = SHA256(s + 密码)，与门户 index.html 同款
+  const srcUser = USERS.find(u => u.account === account) || null;
+  const hash = srcUser ? await sha256((srcUser.s || "") + password) : null;
+  const user = (srcUser && hash && hash === srcUser.passwordHash) ? srcUser : null;
+
+  if (!user) {
+    errEl.textContent = "账号或密码错误";
+    errEl.style.display = "block";
+    return;
+  }
+
+  currentUser = user;
+  sessionStorage.setItem("portal_user", JSON.stringify(user));
+  showMainPage(user);
+}
+
+function doLogout() {
+  currentUser = null;
+  sessionStorage.removeItem("portal_user");
+  document.getElementById("mainPage").style.display = "none";
+  document.getElementById("loginPage").style.display = "flex";
+  document.getElementById("loginAccount").value = "";
+  document.getElementById("loginPassword").value = "";
+  document.getElementById("loginErr").style.display = "none";
+}
+
+function showMainPage(user) {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("mainPage").style.display = "block";
+  document.getElementById("currentUser").textContent = user.name;
+  document.getElementById("welcomeMsg").innerHTML =
+    `欢迎回来，<strong>${user.name}</strong>！以下是你有权限查看的数据看板：`;
+
+  const grid = document.getElementById("dashboardGrid");
+  grid.innerHTML = "";
+
+  const allowed = DASHBOARDS.filter(d => user.dashboards.includes(d.id));
+
+  if (allowed.length === 0) {
+    grid.innerHTML = `<div class="empty-msg">暂无你有权限查看的看板，请联系管理员。</div>`;
+    return;
+  }
+
+  allowed.forEach(d => {
+    const card = document.createElement("a");
+    card.className = "card";
+    card.href = d.url;
+    card.target = "_blank";
+    card.rel = "noopener";
+    card.innerHTML = `
+      <div class="card-icon" style="background:${d.iconColor}22; color:${d.iconColor};">
+        ${d.icon}
+      </div>
+      <div class="card-title">${d.title}</div>
+      <div class="card-desc">${d.desc}</div>
+      <div class="card-meta">
+        <span class="tag">版本 ${d.version}</span>
+        <span class="tag">${d.date}</span>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// 回车键登录
+document.getElementById("loginPassword").addEventListener("keydown", e => {
+  if (e.key === "Enter") doLogin();
+});
+
+// 页面加载时检查是否已登录
+(function init() {
+  const saved = sessionStorage.getItem("portal_user");
+  if (saved) {
+    try {
+      currentUser = JSON.parse(saved);
+      showMainPage(currentUser);
+      return;
+    } catch(e) {}
+  }
+  document.getElementById("loginAccount").focus();
+})();
+</script>
+</body>
+</html>
+
