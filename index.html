@@ -8,7 +8,7 @@
 // 门户自动更新：检测 portal_version.json，版本不符则强制回源刷新（绕过 CDN/浏览器缓存，用户零操作）
 (function(){
   try {
-    var PORTAL_VERSION = "v12-20260902-2115";
+    var PORTAL_VERSION = "v13-20260923-1750";
     fetch('portal_version.json?_=' + Date.now(), {cache:'no-store'})
       .then(function(r){ return r.json(); })
       .then(function(d){
@@ -559,6 +559,13 @@ const USERS = [
     s: "707474c54625486e71f238eb314bc2ea", passwordHash: "2869def6037491cc3adf01f1e7a4e4b1880c919f631c983c8b0e0a1de973f757",
     name: "zhoutong",
     dashboards: ["shengyue"]
+  },
+  {
+    account: "ying",
+    // SHA-256(salt + password)，salt 见同对象 s 字段
+    s: "8f7858978334775c2de978a24d108d1e", passwordHash: "c9eacfc7884f4a403e70d62fd93af18d30e61a996225734ab8362e89a5deb4bd",
+    name: "ying",
+    dashboards: ["ziyang", "shengyue", "pip"]
   }
   // 【新增用户示例】复制上面一段，修改 account/passwordHash/name/dashboards 即可
   // 生成方法：在浏览器控制台执行 await plHash("你的密码")，把返回的 s / h 分别填入
@@ -692,6 +699,7 @@ const PORTAL_LOG_KEY = "__PORTAL_LOGIN_LOG__";
 let plPermUnlocked = false;   // chengcheng 登录成功时自动置 true（对应梓洋「本人登录自动通过」）
 let plPermRows = [];          // 当前渲染的账号下标表（onclick 按下标取，避免注入）
 let plVersionRows = [
+  { v: "v13-20260923", d: "2026-09-23", c: "新增账号 ying（可见看板：梓洋L1 / 声乐 / PIP）；portal_users.json 与源码 USERS 双向同步，PORTAL_VERSION 与 portal_version.json 对齐消除 _pv 重定向" },
   { v: "v12-20260902", d: "2026-09-02", c: "权限管理新增 ✏️ 编辑按钮（老账号可直接改可见看板，无需删号重建）；新增 portal_users.json 全网账号名单（各看板门禁同源读取，导出配置交维护者部署即全网生效）；埋点修复：环境 ID 更正 + CloudBase SDK 固定 3.9.1 + 匿名登录新 API" },
   { v: "v11-20260902", d: "2026-09-02", c: "权限管理操作按钮改为 4 个：⏸ 停用 / ✅ 恢复 / 🔑 改密 / 🗑 删除（不适用的按钮自动置灰，防误操作）" },
   { v: "v10-20260902", d: "2026-09-02", c: "新增「管理日志」（登录记录 / 版本迭代 / 权限管理，仅 chengcheng 可见）；CloudBase 访客埋点（打开 / 登录 / 心跳上报云函数 logVisit）；PORTAL_VERSION 与 portal_version.json 统一（消除 _pv 后缀重定向）；梓洋卡片同步 v268-eval-v51" },

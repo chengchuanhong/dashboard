@@ -46,5 +46,16 @@
       "shengyue",
       "shengyue-fengkong"
     ]
+  },
+  {
+    "account": "ying",
+    "s": "8f7858978334775c2de978a24d108d1e",
+    "passwordHash": "c9eacfc7884f4a403e70d62fd93af18d30e61a996225734ab8362e89a5deb4bd",
+    "name": "ying",
+    "dashboards": [
+      "ziyang",
+      "shengyue",
+      "pip"
+    ]
   }
 ]
