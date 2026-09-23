@@ -8,7 +8,7 @@
 // 门户自动更新：检测 portal_version.json，版本不符则强制回源刷新（绕过 CDN/浏览器缓存，用户零操作）
 (function(){
   try {
-    var PORTAL_VERSION = "v13-20260923-1750";
+    var PORTAL_VERSION = "v14-20260923-1820";
     fetch('portal_version.json?_=' + Date.now(), {cache:'no-store'})
       .then(function(r){ return r.json(); })
       .then(function(d){
@@ -699,6 +699,7 @@ const PORTAL_LOG_KEY = "__PORTAL_LOGIN_LOG__";
 let plPermUnlocked = false;   // chengcheng 登录成功时自动置 true（对应梓洋「本人登录自动通过」）
 let plPermRows = [];          // 当前渲染的账号下标表（onclick 按下标取，避免注入）
 let plVersionRows = [
+  { v: "v14-20260923", d: "2026-09-23", c: "修复账号 zhoutong 登录失效：源码 USERS 有该账号但 portal_users.json 缺失，远端名单会覆盖源码名单导致无法登录，现补入远端名单（可见看板：声乐）" },
   { v: "v13-20260923", d: "2026-09-23", c: "新增账号 ying（可见看板：梓洋L1 / 声乐 / PIP）；portal_users.json 与源码 USERS 双向同步，PORTAL_VERSION 与 portal_version.json 对齐消除 _pv 重定向" },
   { v: "v12-20260902", d: "2026-09-02", c: "权限管理新增 ✏️ 编辑按钮（老账号可直接改可见看板，无需删号重建）；新增 portal_users.json 全网账号名单（各看板门禁同源读取，导出配置交维护者部署即全网生效）；埋点修复：环境 ID 更正 + CloudBase SDK 固定 3.9.1 + 匿名登录新 API" },
   { v: "v11-20260902", d: "2026-09-02", c: "权限管理操作按钮改为 4 个：⏸ 停用 / ✅ 恢复 / 🔑 改密 / 🗑 删除（不适用的按钮自动置灰，防误操作）" },
