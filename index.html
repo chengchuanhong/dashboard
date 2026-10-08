@@ -8,7 +8,7 @@
 // 门户自动更新：检测 portal_version.json，版本不符则强制回源刷新（绕过 CDN/浏览器缓存，用户零操作）
 (function(){
   try {
-    var PORTAL_VERSION = "v14-20260923-1820";
+    var PORTAL_VERSION = "v15-20261008-2045";
     fetch('portal_version.json?_=' + Date.now(), {cache:'no-store'})
       .then(function(r){ return r.json(); })
       .then(function(d){
@@ -505,6 +505,16 @@ const DASHBOARDS = [
     version: "v9",
     date: "2026-10-03"
   },
+  {
+    id: "shengyue-pip",
+    title: "声乐PIP考核看板",
+    desc: "声乐升降班与PIP汰换考核，产值唯一口径，北深分开算大盘",
+    icon: "🎼",
+    iconColor: "#bc8cff",
+    url: "shengyue-pip.html",
+    version: "sy-v1.2",
+    date: "2026-10-08"
+  },
   // 【新增看板示例】复制上面一段，修改 id/title/desc/url/version/date 即可
   // {
   //   id: "newboard",
@@ -530,42 +540,42 @@ const USERS = [
     // SHA-256(salt + password)，salt 见同对象 s 字段
     s: "8b348aef9df925e8d47bb8147bc912e7", passwordHash: "65fed6c65d9c1bb8c20f8c0b71bbe4ec857fefe75b12344c75b64f00e14167e1",
     name: "chengcheng",
-    dashboards: ["ziyang", "pip", "shengyue", "weekly", "hrbp-web", "hr", "shengyue-fengkong"]
+    dashboards: ["ziyang", "pip", "shengyue", "weekly", "hrbp-web", "hr", "shengyue-fengkong", "shengyue-pip"]
   },
   {
     account: "yangnan",
     // SHA-256(salt + password)，salt 见同对象 s 字段
     s: "44a72694820ee5cb1cef534a46f14e13", passwordHash: "8d5d0471315d8f93cee31ca0072d038b8404de3484eb4a8f19b25cd620ca1928",
     name: "yangnan",
-    dashboards: ["ziyang", "pip", "shengyue", "weekly", "shengyue-fengkong"]
+    dashboards: ["ziyang", "pip", "shengyue", "weekly", "shengyue-fengkong", "shengyue-pip"]
   },
   {
     account: "xiaoyingbing",
     // SHA-256(salt + password)，salt 见同对象 s 字段
     s: "99877253d32e8a698b903671864d658b", passwordHash: "6039365d36118f0ecfe68411d5ced01751a8d52f140dc318f39075ea474ae7b8",
     name: "xiaoyingbing",
-    dashboards: ["shengyue", "shengyue-fengkong"]
+    dashboards: ["shengyue", "shengyue-fengkong", "shengyue-pip"]
   },
   {
     account: "zhaochunhong",
     // SHA-256(salt + password)，salt 见同对象 s 字段
     s: "b4e3252b36471f9c140da9547f884e62", passwordHash: "485d93026b6a58d5991ece7dfd4c7f021e6a4edd03869c8c3bd3da2ec297bbbd",
     name: "zhaochunhong",
-    dashboards: ["shengyue", "shengyue-fengkong", "weekly"]
+    dashboards: ["shengyue", "shengyue-fengkong", "weekly", "shengyue-pip"]
   },
   {
     account: "zhoutong",
     // SHA-256(salt + password)，salt 见同对象 s 字段
     s: "707474c54625486e71f238eb314bc2ea", passwordHash: "2869def6037491cc3adf01f1e7a4e4b1880c919f631c983c8b0e0a1de973f757",
     name: "zhoutong",
-    dashboards: ["shengyue"]
+    dashboards: ["shengyue", "shengyue-pip"]
   },
   {
     account: "ying",
     // SHA-256(salt + password)，salt 见同对象 s 字段
     s: "8f7858978334775c2de978a24d108d1e", passwordHash: "c9eacfc7884f4a403e70d62fd93af18d30e61a996225734ab8362e89a5deb4bd",
     name: "ying",
-    dashboards: ["ziyang", "shengyue", "pip"]
+    dashboards: ["ziyang", "shengyue", "pip", "shengyue-pip"]
   }
   // 【新增用户示例】复制上面一段，修改 account/passwordHash/name/dashboards 即可
   // 生成方法：在浏览器控制台执行 await plHash("你的密码")，把返回的 s / h 分别填入
@@ -699,6 +709,7 @@ const PORTAL_LOG_KEY = "__PORTAL_LOGIN_LOG__";
 let plPermUnlocked = false;   // chengcheng 登录成功时自动置 true（对应梓洋「本人登录自动通过」）
 let plPermRows = [];          // 当前渲染的账号下标表（onclick 按下标取，避免注入）
 let plVersionRows = [
+  { v: "v15-20261008", d: "2026-10-08", c: "新增「声乐PIP考核看板」卡片（sy-v1.2，AES加密壳，口令 sypip）；上线 shengyue-pip.html；班型口径＝源库录入优先 + 无录入按添加人数分档（≤300小/≤600中/≤900大/>900超大）；可见范围比照声乐看板（全 6 账号）" },
   { v: "v14-20260923", d: "2026-09-23", c: "修复账号 zhoutong 登录失效：源码 USERS 有该账号但 portal_users.json 缺失，远端名单会覆盖源码名单导致无法登录，现补入远端名单（可见看板：声乐）" },
   { v: "v13-20260923", d: "2026-09-23", c: "新增账号 ying（可见看板：梓洋L1 / 声乐 / PIP）；portal_users.json 与源码 USERS 双向同步，PORTAL_VERSION 与 portal_version.json 对齐消除 _pv 重定向" },
   { v: "v12-20260902", d: "2026-09-02", c: "权限管理新增 ✏️ 编辑按钮（老账号可直接改可见看板，无需删号重建）；新增 portal_users.json 全网账号名单（各看板门禁同源读取，导出配置交维护者部署即全网生效）；埋点修复：环境 ID 更正 + CloudBase SDK 固定 3.9.1 + 匿名登录新 API" },
