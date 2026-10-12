@@ -5,10 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>极星CC — 数据看板门户</title>
 <script>
+/* v20: 深浅模式 —— 首屏渲染前应用主题，避免亮/暗闪烁 */
+(function(){
+  var t = "dark";
+  try { t = localStorage.getItem("__PORTAL_THEME__") || "dark"; } catch(e) {}
+  if (t !== "light") t = "dark";
+  document.documentElement.setAttribute("data-theme", t);
+})();
+</script>
+<script>
 // 门户自动更新：检测 portal_version.json，版本不符则强制回源刷新（绕过 CDN/浏览器缓存，用户零操作）
 (function(){
   try {
-    var PORTAL_VERSION = "v19-20261012-1502";
+    var PORTAL_VERSION = "v20-20261012-1730";
     fetch('portal_version.json?_=' + Date.now(), {cache:'no-store'})
       .then(function(r){ return r.json(); })
       .then(function(d){
@@ -62,12 +71,96 @@ window.__ccLogVisit('打开页面', '门户首页');
 })();
 </script>
 <style>
+  /* ===== v20: 深浅模式主题变量 ===== */
+  :root {
+    color-scheme: dark;
+    --bg:            #0d1117;
+    --bg-elev:       #161b22;
+    --bg-inset:      #0d1117;
+    --bg-sub:        #21262d;
+    --border:        #30363d;
+    --text:          #c9d1d9;
+    --text-strong:   #e6edf3;
+    --text-muted:    #8b949e;
+    --text-faint:    #484f58;
+    --accent:        #58a6ff;
+    --accent-bg:     #1f6feb;
+    --green:         #238636;
+    --green-hover:   #2ea043;
+    --green-txt:     #3fb950;
+    --red:           #f85149;
+    --purple-txt:    #bc8cff;
+    --shadow:        0 8px 32px rgba(0,0,0,.5);
+    --modal-shadow:  0 18px 60px rgba(0,0,0,.4);
+    --tag-g-bg:      rgba(63,185,80,.15);
+    --tag-r-bg:      rgba(248,81,73,.15);
+    --btn-danger-bg: rgba(248,81,73,.12);
+    --overlay:       rgba(15,23,42,.62);
+  }
+  html[data-theme="light"] {
+    color-scheme: light;
+    --bg:            #f6f8fa;
+    --bg-elev:       #ffffff;
+    --bg-inset:      #ffffff;
+    --bg-sub:        #eaeef2;
+    --border:        #d0d7de;
+    --text:          #1f2328;
+    --text-strong:   #0d1117;
+    --text-muted:    #59636e;
+    --text-faint:    #8c959f;
+    --accent:        #0969da;
+    --accent-bg:     #0969da;
+    --green:         #1a7f37;
+    --green-hover:   #1f883d;
+    --green-txt:     #1a7f37;
+    --red:           #cf222e;
+    --purple-txt:    #8250df;
+    --shadow:        0 6px 24px rgba(31,35,40,.10);
+    --modal-shadow:  0 18px 60px rgba(31,35,40,.22);
+    --tag-g-bg:      rgba(26,127,55,.12);
+    --tag-r-bg:      rgba(207,34,46,.10);
+    --btn-danger-bg: rgba(207,34,46,.08);
+    --overlay:       rgba(31,35,40,.45);
+  }
+  html { background: var(--bg); }
+
+  /* ===== v20: 深浅模式切换按钮 ===== */
+  .btn-theme {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color .2s, color .2s, background .2s;
+  }
+  .btn-theme:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-theme svg { display: block; }
+  html[data-theme="light"] .ico-sun  { display: none; }
+  html[data-theme="dark"]  .ico-moon { display: none; }
+  #themeFloat {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 2147483000;
+    background: var(--bg-elev);
+    box-shadow: var(--shadow);
+    width: 38px;
+    height: 38px;
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: #0d1117;
-    color: #c9d1d9;
+    background: var(--bg);
+    color: var(--text);
     min-height: 100vh;
+    transition: background .25s ease, color .25s ease;
   }
 
   /* ===== 登录页 ===== */
@@ -78,50 +171,50 @@ window.__ccLogVisit('打开页面', '门户首页');
     min-height: 100vh;
   }
   .login-box {
-    background: #161b22;
-    border: 1px solid #30363d;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 48px 40px;
     width: 380px;
-    box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    box-shadow: var(--shadow);
   }
   .login-box h1 {
     text-align: center;
     font-size: 22px;
-    color: #58a6ff;
+    color: var(--accent);
     margin-bottom: 8px;
   }
   .login-box .subtitle {
     text-align: center;
     font-size: 13px;
-    color: #8b949e;
+    color: var(--text-muted);
     margin-bottom: 32px;
   }
   .login-box label {
     display: block;
     font-size: 13px;
-    color: #8b949e;
+    color: var(--text-muted);
     margin-bottom: 6px;
   }
   .login-box input {
     width: 100%;
     padding: 10px 14px;
-    background: #0d1117;
-    border: 1px solid #30363d;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
     border-radius: 6px;
-    color: #c9d1d9;
+    color: var(--text);
     font-size: 15px;
     margin-bottom: 18px;
     outline: none;
     transition: border-color .2s;
   }
   .login-box input:focus {
-    border-color: #58a6ff;
+    border-color: var(--accent);
   }
   .login-box button {
     width: 100%;
     padding: 11px;
-    background: #238636;
+    background: var(--green);
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -129,9 +222,9 @@ window.__ccLogVisit('打开页面', '门户首页');
     cursor: pointer;
     transition: background .2s;
   }
-  .login-box button:hover { background: #2ea043; }
+  .login-box button:hover { background: var(--green-hover); }
   .login-err {
-    color: #f85149;
+    color: var(--red);
     font-size: 13px;
     text-align: center;
     margin-top: 12px;
@@ -142,8 +235,8 @@ window.__ccLogVisit('打开页面', '门户首页');
   #mainPage { display: none; }
 
   .header {
-    background: #161b22;
-    border-bottom: 1px solid #30363d;
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--border);
     padding: 16px 32px;
     display: flex;
     align-items: center;
@@ -151,7 +244,7 @@ window.__ccLogVisit('打开页面', '门户首页');
   }
   .header h1 {
     font-size: 18px;
-    color: #58a6ff;
+    color: var(--accent);
   }
   .header-right {
     display: flex;
@@ -160,19 +253,19 @@ window.__ccLogVisit('打开页面', '门户首页');
   }
   .header-user {
     font-size: 14px;
-    color: #8b949e;
+    color: var(--text-muted);
   }
-  .header-user span { color: #c9d1d9; font-weight: 600; }
+  .header-user span { color: var(--text); font-weight: 600; }
   .btn-logout {
     background: none;
-    border: 1px solid #30363d;
-    color: #8b949e;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
     padding: 6px 14px;
     border-radius: 6px;
     cursor: pointer;
     font-size: 13px;
   }
-  .btn-logout:hover { border-color: #f85149; color: #f85149; }
+  .btn-logout:hover { border-color: var(--red); color: var(--red); }
 
   .page-body {
     max-width: 1100px;
@@ -181,10 +274,10 @@ window.__ccLogVisit('打开页面', '门户首页');
   }
   .welcome {
     font-size: 15px;
-    color: #8b949e;
+    color: var(--text-muted);
     margin-bottom: 28px;
   }
-  .welcome strong { color: #c9d1d9; }
+  .welcome strong { color: var(--text); }
 
   .grid {
     display: grid;
@@ -193,8 +286,8 @@ window.__ccLogVisit('打开页面', '门户首页');
   }
 
   .card {
-    background: #161b22;
-    border: 1px solid #30363d;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 28px 24px;
     cursor: pointer;
@@ -204,7 +297,7 @@ window.__ccLogVisit('打开页面', '门户首页');
     display: block;
   }
   .card:hover {
-    border-color: #58a6ff;
+    border-color: var(--accent);
     transform: translateY(-3px);
   }
   .card-icon {
@@ -220,12 +313,12 @@ window.__ccLogVisit('打开页面', '门户首页');
   .card-title {
     font-size: 17px;
     font-weight: 600;
-    color: #c9d1d9;
+    color: var(--text);
     margin-bottom: 6px;
   }
   .card-desc {
     font-size: 13px;
-    color: #8b949e;
+    color: var(--text-muted);
     margin-bottom: 14px;
     line-height: 1.5;
   }
@@ -233,17 +326,17 @@ window.__ccLogVisit('打开页面', '门户首页');
     display: flex;
     gap: 12px;
     font-size: 12px;
-    color: #8b949e;
+    color: var(--text-muted);
   }
   .card-meta .tag {
-    background: #21262d;
+    background: var(--bg-sub);
     padding: 2px 8px;
     border-radius: 4px;
   }
 
   .empty-msg {
     text-align: center;
-    color: #8b949e;
+    color: var(--text-muted);
     font-size: 15px;
     padding: 60px 0;
     grid-column: 1 / -1;
@@ -253,51 +346,51 @@ window.__ccLogVisit('打开页面', '门户首页');
     text-align: center;
     padding: 32px;
     font-size: 12px;
-    color: #484f58;
-    border-top: 1px solid #21262d;
+    color: var(--text-faint);
+    border-top: 1px solid var(--bg-sub);
     margin-top: 48px;
   }
 
   /* ===== v10 管理日志（仅管理员 chengcheng 可见）===== */
-  .pl-entry-btn { background:none; border:1px solid #30363d; color:#8b949e; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:13px; }
-  .pl-entry-btn:hover { border-color:#58a6ff; color:#58a6ff; }
-  .pl-section-label { font-size:15px; font-weight:600; color:#58a6ff; margin:44px 0 4px; }
-  .pl-section-label .pl-hint { font-size:12px; font-weight:400; color:#8b949e; margin-left:8px; }
+  .pl-entry-btn { background:none; border:1px solid var(--border); color:var(--text-muted); padding:6px 14px; border-radius:6px; cursor:pointer; font-size:13px; }
+  .pl-entry-btn:hover { border-color:var(--accent); color:var(--accent); }
+  .pl-section-label { font-size:15px; font-weight:600; color:var(--accent); margin:44px 0 4px; }
+  .pl-section-label .pl-hint { font-size:12px; font-weight:400; color:var(--text-muted); margin-left:8px; }
   .pl-topbar { display:flex; align-items:center; gap:14px; margin:4px 0 14px; }
-  .pl-topbar-title { font-size:18px; font-weight:700; color:#e6edf3; }
-  .pl-topbar-title .pl-hint { font-size:12px; font-weight:400; color:#8b949e; margin-left:8px; }
+  .pl-topbar-title { font-size:18px; font-weight:700; color:var(--text-strong); }
+  .pl-topbar-title .pl-hint { font-size:12px; font-weight:400; color:var(--text-muted); margin-left:8px; }
   .pl-subnav { display:flex; gap:8px; margin:12px 0 16px; flex-wrap:wrap; }
-  .pl-subnav button { background:#21262d; border:1px solid #30363d; color:#c9d1d9; padding:7px 14px; border-radius:6px; cursor:pointer; font-size:13px; }
-  .pl-subnav button:hover { border-color:#58a6ff; }
-  .pl-subnav button.pl-active { background:#1f6feb; border-color:#1f6feb; color:#fff; }
-  .pl-card { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:20px 22px; margin-bottom:16px; }
-  .pl-card-title { font-size:15px; font-weight:600; color:#c9d1d9; margin-bottom:14px; display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
-  .pl-card-title .pl-hint { font-size:12px; font-weight:400; color:#8b949e; }
+  .pl-subnav button { background:var(--bg-sub); border:1px solid var(--border); color:var(--text); padding:7px 14px; border-radius:6px; cursor:pointer; font-size:13px; }
+  .pl-subnav button:hover { border-color:var(--accent); }
+  .pl-subnav button.pl-active { background:var(--accent-bg); border-color:var(--accent-bg); color:#fff; }
+  .pl-card { background:var(--bg-elev); border:1px solid var(--border); border-radius:12px; padding:20px 22px; margin-bottom:16px; }
+  .pl-card-title { font-size:15px; font-weight:600; color:var(--text); margin-bottom:14px; display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+  .pl-card-title .pl-hint { font-size:12px; font-weight:400; color:var(--text-muted); }
   .pl-kpi { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
-  .pl-kpi .tile { background:#0d1117; border:1px solid #30363d; border-radius:8px; padding:14px; }
-  .pl-kpi .tile .lb { font-size:12px; color:#8b949e; margin-bottom:6px; }
-  .pl-kpi .tile .vl { font-size:22px; font-weight:700; color:#c9d1d9; }
-  .pl-kpi .tile.t-blue .vl { color:#58a6ff; }
-  .pl-kpi .tile.t-green .vl { color:#3fb950; }
-  .pl-kpi .tile.t-red .vl { color:#f85149; }
-  .pl-kpi .tile.t-purple .vl { color:#bc8cff; }
-  .pl-tbl-wrap { max-height:420px; overflow-y:auto; border:1px solid #30363d; border-radius:8px; }
+  .pl-kpi .tile { background:var(--bg-inset); border:1px solid var(--border); border-radius:8px; padding:14px; }
+  .pl-kpi .tile .lb { font-size:12px; color:var(--text-muted); margin-bottom:6px; }
+  .pl-kpi .tile .vl { font-size:22px; font-weight:700; color:var(--text); }
+  .pl-kpi .tile.t-blue .vl { color:var(--accent); }
+  .pl-kpi .tile.t-green .vl { color:var(--green-txt); }
+  .pl-kpi .tile.t-red .vl { color:var(--red); }
+  .pl-kpi .tile.t-purple .vl { color:var(--purple-txt); }
+  .pl-tbl-wrap { max-height:420px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; }
   .pl-table { width:100%; border-collapse:collapse; font-size:13px; }
-  .pl-table th { position:sticky; top:0; background:#161b22; color:#8b949e; font-weight:600; text-align:left; padding:10px 12px; border-bottom:1px solid #30363d; z-index:1; }
-  .pl-table td { padding:9px 12px; border-bottom:1px solid #21262d; color:#c9d1d9; text-align:left; }
+  .pl-table th { position:sticky; top:0; background:var(--bg-elev); color:var(--text-muted); font-weight:600; text-align:left; padding:10px 12px; border-bottom:1px solid var(--border); z-index:1; }
+  .pl-table td { padding:9px 12px; border-bottom:1px solid var(--bg-sub); color:var(--text); text-align:left; }
   .pl-tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:12px; }
-  .pl-tag.g { background:rgba(63,185,80,.15); color:#3fb950; }
-  .pl-tag.r { background:rgba(248,81,73,.15); color:#f85149; }
-  .pl-tag.n { background:#21262d; color:#8b949e; }
-  .pl-btn { background:#21262d; border:1px solid #30363d; color:#c9d1d9; padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px; }
-  .pl-btn:hover { border-color:#58a6ff; }
-  .pl-btn.danger { background:rgba(248,81,73,.12); border-color:#f85149; color:#f85149; }
-  .pl-btn.primary { background:#1f6feb; border-color:#1f6feb; color:#fff; }
-  .pl-note { color:#8b949e; font-size:12px; margin-top:10px; line-height:1.7; }
-  .pl-input { padding:8px 12px; background:#0d1117; border:1px solid #30363d; border-radius:6px; color:#c9d1d9; font-size:13px; outline:none; }
-  .pl-input:focus { border-color:#58a6ff; }
+  .pl-tag.g { background:var(--tag-g-bg); color:var(--green-txt); }
+  .pl-tag.r { background:var(--tag-r-bg); color:var(--red); }
+  .pl-tag.n { background:var(--bg-sub); color:var(--text-muted); }
+  .pl-btn { background:var(--bg-sub); border:1px solid var(--border); color:var(--text); padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px; }
+  .pl-btn:hover { border-color:var(--accent); }
+  .pl-btn.danger { background:var(--btn-danger-bg); border-color:var(--red); color:var(--red); }
+  .pl-btn.primary { background:var(--accent-bg); border-color:var(--accent-bg); color:#fff; }
+  .pl-note { color:var(--text-muted); font-size:12px; margin-top:10px; line-height:1.7; }
+  .pl-input { padding:8px 12px; background:var(--bg-inset); border:1px solid var(--border); border-radius:6px; color:var(--text); font-size:13px; outline:none; }
+  .pl-input:focus { border-color:var(--accent); }
   .pl-form-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
-  .pl-dash-checks { display:flex; gap:12px; flex-wrap:wrap; margin:4px 0 12px; font-size:12px; color:#c9d1d9; }
+  .pl-dash-checks { display:flex; gap:12px; flex-wrap:wrap; margin:4px 0 12px; font-size:12px; color:var(--text); }
   .pl-dash-checks label { display:flex; align-items:center; gap:4px; cursor:pointer; }
 </style>
 </head>
@@ -305,6 +398,10 @@ window.__ccLogVisit('打开页面', '门户首页');
 
 <!-- 登录页 -->
 <div id="loginPage">
+  <button class="btn-theme" id="themeFloat" onclick="toggleTheme()" title="切换深浅模式" aria-label="切换深浅模式">
+    <svg class="ico-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+    <svg class="ico-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+  </button>
   <div class="login-box">
     <h1>🟦 数据看板门户</h1>
     <p class="subtitle">极星CC · 请输入账号密码</p>
@@ -322,6 +419,10 @@ window.__ccLogVisit('打开页面', '门户首页');
   <div class="header">
     <h1>🟦 数据看板门户</h1>
     <div class="header-right">
+      <button class="btn-theme" onclick="toggleTheme()" title="切换深浅模式" aria-label="切换深浅模式">
+        <svg class="ico-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="ico-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      </button>
       <button class="pl-entry-btn" id="adminLogEntryBtn" style="display:none" onclick="plToggleAdminLog()">🛠 管理日志</button>
       <div class="header-user">当前用户：<span id="currentUser"></span></div>
       <button class="btn-logout" onclick="doLogout()">退出登录</button>
@@ -603,6 +704,14 @@ function sha256(str) {
 
 let currentUser = null;
 
+// v20: 深浅模式切换（localStorage 记忆，刷新/下次访问保持）
+function toggleTheme() {
+  var cur = document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+  var next = (cur === "light") ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", next);
+  try { localStorage.setItem("__PORTAL_THEME__", next); } catch (e) {}
+}
+
 async function doLogin() {
   const account = document.getElementById("loginAccount").value.trim();
   const password = document.getElementById("loginPassword").value;
@@ -709,6 +818,7 @@ const PORTAL_LOG_KEY = "__PORTAL_LOGIN_LOG__";
 let plPermUnlocked = false;   // chengcheng 登录成功时自动置 true（对应梓洋「本人登录自动通过」）
 let plPermRows = [];          // 当前渲染的账号下标表（onclick 按下标取，避免注入）
 let plVersionRows = [
+  { v: "v20-20261012", d: "2026-10-12", c: "新增深浅模式切换：门户右上角（登录页固定浮动 / 主页面页头内）一键切换深色·浅色主题，选择写入 localStorage 长期记忆；全站配色改为 CSS 变量驱动，首屏渲染前应用主题杜绝闪烁；管理日志的表格/KPI/按钮/编辑弹窗一并适配浅色" },
   { v: "v19-20261012", d: "2026-10-12", c: "声乐PIP考核看板 sy-v2.0：自动部署 2026-10-12 15:02" },
   { v: "v18-20261010", d: "2026-10-10", c: "声乐PIP考核看板 sy-v1.5：修正班型取数口径——原实现按「已结营营期」回溯取源库班型，会丢弃 P207–P210（未结营）的 tableau 分班结果，导致 9 位班长取到更早的旧班型；改为按「全部营期」取最新非空录入值（班型是开营前的分班结果，与是否结营无关）。班型来源 已录入 72 / 推定 337 不变" },
   { v: "v17-20261010", d: "2026-10-10", c: "声乐PIP考核看板 sy-v1.4：详情弹窗四张图表指标由「产值 + ROI」改为「产值 + 转化率」（转化率趋势折线 / 转化率柱状图，数据源 conv_raw×100 与大盘转率，y 轴百分比口径）" },
@@ -777,7 +887,7 @@ function plRenderLoginLog() {
   for (var i = 0; i < log.length; i++) {
     var r = log[i];
     var badge = r.ok ? '<span class="pl-tag g">成功</span>' : '<span class="pl-tag r">失败</span>';
-    var userShow = r.user ? plEsc(r.user) : '<span style="color:#8b949e">（空）</span>';
+    var userShow = r.user ? plEsc(r.user) : '<span style="color:var(--text-muted)">（空）</span>';
     html += '<tr><td>' + plFmtTs(r.ts) + '</td><td>' + userShow + '</td><td>' + badge + '</td><td>' + plEsc(r.dev || "未知设备") + '</td></tr>';
   }
   tbody.innerHTML = html;
@@ -978,7 +1088,7 @@ function plEditBoards(row) {
   var html = "";
   DASHBOARDS.forEach(d => {
     var on = cur.indexOf(d.id) >= 0 ? " checked" : "";
-    html += '<label style="display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:13.5px;color:#0f172a">'
+    html += '<label style="display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;font-size:13.5px;color:var(--text-strong)">'
           + '<input type="checkbox" class="plEBChk" value="' + plEsc(d.id) + '"' + on + '> ' + plEsc(d.title) + '</label>';
   });
   box.innerHTML = html;
@@ -1099,16 +1209,16 @@ function plDownloadConfig() {
 })();
 </script>
 <!-- v12: 编辑可见看板对话框 -->
-<div id="plEditBoardsModal" style="display:none;position:fixed;inset:0;z-index:2147482000;background:rgba(15,23,42,.62);align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif">
-  <div style="background:#fff;border-radius:14px;padding:22px 24px;width:340px;max-height:82vh;overflow:auto;box-shadow:0 18px 60px rgba(0,0,0,.4)">
-    <div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:2px">✏️ 编辑可见看板</div>
-    <div style="font-size:12.5px;color:#64748b;margin-bottom:12px">账号：<b id="plEditBoardsName"></b></div>
+<div id="plEditBoardsModal" style="display:none;position:fixed;inset:0;z-index:2147482000;background:var(--overlay);align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif">
+  <div style="background:var(--bg-elev);border:1px solid var(--border);border-radius:14px;padding:22px 24px;width:340px;max-height:82vh;overflow:auto;box-shadow:var(--modal-shadow)">
+    <div style="font-size:16px;font-weight:700;color:var(--text-strong);margin-bottom:2px">✏️ 编辑可见看板</div>
+    <div style="font-size:12.5px;color:var(--text-muted);margin-bottom:12px">账号：<b id="plEditBoardsName"></b></div>
     <div id="plEditBoardsBox"></div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <button class="pl-btn" style="flex:1" onclick="plEditBoardsSave()">💾 保存</button>
       <button class="pl-btn" style="flex:1" onclick="plEditBoardsClose()">取消</button>
     </div>
-    <div style="font-size:11.5px;color:#94a3b8;margin-top:10px;line-height:1.5">保存后本浏览器立即生效。如需全网生效（含各看板门禁），请「📤 导出配置」交维护者更新 portal_users.json。</div>
+    <div style="font-size:11.5px;color:var(--text-faint);margin-top:10px;line-height:1.5">保存后本浏览器立即生效。如需全网生效（含各看板门禁），请「📤 导出配置」交维护者更新 portal_users.json。</div>
   </div>
 </div>
 </body>
