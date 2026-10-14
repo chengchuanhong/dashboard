@@ -17,7 +17,7 @@
 // 门户自动更新：检测 portal_version.json，版本不符则强制回源刷新（绕过 CDN/浏览器缓存，用户零操作）
 (function(){
   try {
-    var PORTAL_VERSION = "v25-20261014-1130";
+    var PORTAL_VERSION = "v26-20261014-1203";
     fetch('portal_version.json?_=' + Date.now(), {cache:'no-store'})
       .then(function(r){ return r.json(); })
       .then(function(d){
@@ -818,6 +818,7 @@ const PORTAL_LOG_KEY = "__PORTAL_LOGIN_LOG__";
 let plPermUnlocked = false;   // chengcheng 登录成功时自动置 true（对应梓洋「本人登录自动通过」）
 let plPermRows = [];          // 当前渲染的账号下标表（onclick 按下标取，避免注入）
 let plVersionRows = [
+  { v: "v26-20261014", d: "2026-10-14", c: "声乐PIP考核看板 sy-v2.5：声乐PIP考核看板 sy-v2.5 每日刷新 2026-10-14 12:00" },
   { v: "v25-20261014", d: "2026-10-14", c: "声乐PIP看板 sy-v2.5：规则页用词统一为「汰换」" },
   { v: "v24-20261013", d: "2026-10-13", c: "声乐PIP看板 sy-v2.4：PIP 分支条件改为「中班5期3高 通过PIP / 中班5期3低 淘汰」" },
   { v: "v23-20261013", d: "2026-10-13", c: "声乐PIP看板 sy-v2.3：PIP 分支条件改为「中班5期3高 通过PIP / 中班5期3低 汰换」" },
