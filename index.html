@@ -17,7 +17,7 @@
 // 门户自动更新：检测 portal_version.json，版本不符则强制回源刷新（绕过 CDN/浏览器缓存，用户零操作）
 (function(){
   try {
-    var PORTAL_VERSION = "v27-20261014-1211";
+    var PORTAL_VERSION = "v28-20261014-2310";
     fetch('portal_version.json?_=' + Date.now(), {cache:'no-store'})
       .then(function(r){ return r.json(); })
       .then(function(d){
@@ -616,6 +616,26 @@ const DASHBOARDS = [
     version: "sy-v2.5",
     date: "2026-10-14"
   },
+  {
+    id: "ziyang-demo",
+    title: "梓洋L1数据分析看板（演示版）",
+    desc: "演示复刻版：界面/交互/Tab 与正式看板一致，数据为随机生成的演示数据，不含真实业务信息",
+    icon: "🧪",
+    iconColor: "#f59e0b",
+    url: "ziyang-demo.html?v=20261014",
+    version: "演示版 DEMO",
+    date: "2026-10-14"
+  },
+  {
+    id: "shengyue-fengkong-demo",
+    title: "声乐风控数据分析（演示版）",
+    desc: "演示复刻版：支持深色/浅色切换，数据为随机生成的演示数据，不含真实业务信息",
+    icon: "🧪",
+    iconColor: "#f59e0b",
+    url: "shengyue-fengkong-demo.html?v=20261014",
+    version: "演示版 DEMO",
+    date: "2026-10-14"
+  },
   // 【新增看板示例】复制上面一段，修改 id/title/desc/url/version/date 即可
   // {
   //   id: "newboard",
@@ -641,7 +661,7 @@ const USERS = [
     // SHA-256(salt + password)，salt 见同对象 s 字段
     s: "8b348aef9df925e8d47bb8147bc912e7", passwordHash: "65fed6c65d9c1bb8c20f8c0b71bbe4ec857fefe75b12344c75b64f00e14167e1",
     name: "chengcheng",
-    dashboards: ["ziyang", "pip", "shengyue", "weekly", "hrbp-web", "hr", "shengyue-fengkong", "shengyue-pip"]
+    dashboards: ["ziyang", "pip", "shengyue", "weekly", "hrbp-web", "hr", "shengyue-fengkong", "shengyue-pip", "ziyang-demo", "shengyue-fengkong-demo"]
   },
   {
     account: "yangnan",
@@ -818,6 +838,7 @@ const PORTAL_LOG_KEY = "__PORTAL_LOGIN_LOG__";
 let plPermUnlocked = false;   // chengcheng 登录成功时自动置 true（对应梓洋「本人登录自动通过」）
 let plPermRows = [];          // 当前渲染的账号下标表（onclick 按下标取，避免注入）
 let plVersionRows = [
+  { v: "v28-20261014", d: "2026-10-14", c: "门户新增 2 张演示版卡片（梓洋演示版 / 声乐风控演示版），仅 chengcheng 可见" },
   { v: "v27-20261014", d: "2026-10-14", c: "声乐PIP考核看板 sy-v2.5：声乐PIP考核看板 sy-v2.5 每日刷新 2026-10-14 11:41" },
   { v: "v26-20261014", d: "2026-10-14", c: "声乐PIP考核看板 sy-v2.5：声乐PIP考核看板 sy-v2.5 每日刷新 2026-10-14 12:00" },
   { v: "v25-20261014", d: "2026-10-14", c: "声乐PIP看板 sy-v2.5：规则页用词统一为「汰换」" },
