@@ -17,7 +17,7 @@
 // 门户自动更新：检测 portal_version.json，版本不符则强制回源刷新（绕过 CDN/浏览器缓存，用户零操作）
 (function(){
   try {
-    var PORTAL_VERSION = "v29-20261015-1236";
+    var PORTAL_VERSION = "v30-20261016-1130";
     fetch('portal_version.json?_=' + Date.now(), {cache:'no-store'})
       .then(function(r){ return r.json(); })
       .then(function(d){
@@ -614,7 +614,7 @@ const DASHBOARDS = [
     iconColor: "#bc8cff",
     url: "shengyue-pip.html",
     version: "sy-v2.5",
-    date: "2026-10-15"
+    date: "2026-10-16"
   },
   {
     id: "ziyang-demo",
@@ -838,6 +838,7 @@ const PORTAL_LOG_KEY = "__PORTAL_LOGIN_LOG__";
 let plPermUnlocked = false;   // chengcheng 登录成功时自动置 true（对应梓洋「本人登录自动通过」）
 let plPermRows = [];          // 当前渲染的账号下标表（onclick 按下标取，避免注入）
 let plVersionRows = [
+  { v: "v30-20261016", d: "2026-10-16", c: "声乐PIP考核看板 sy-v2.5：声乐PIP考核看板 sy-v2.5 每日刷新 2026-10-16 11:24" },
   { v: "v29-20261015", d: "2026-10-15", c: "声乐PIP考核看板 sy-v2.5：声乐PIP考核看板 sy-v2.5 每日刷新 2026-10-15 12:34" },
   { v: "v28-20261014", d: "2026-10-14", c: "门户新增 2 张演示版卡片（梓洋演示版 / 声乐风控演示版），仅 chengcheng 可见" },
   { v: "v27-20261014", d: "2026-10-14", c: "声乐PIP考核看板 sy-v2.5：声乐PIP考核看板 sy-v2.5 每日刷新 2026-10-14 11:41" },
