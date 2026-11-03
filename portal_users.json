@@ -78,5 +78,43 @@
       "shengyue-pip",
       "shengyue-fengkong"
     ]
+  },
+  {
+    "account": "mumu",
+    "s": "b4ae6c65b0c27e82753b4e26c29f7efe",
+    "passwordHash": "8d78807cf80abbc32af51e423af78090742d00752bdb0a8d714863ce7f48dae3",
+    "name": "mumu",
+    "dashboards": [
+      "ziyang",
+      "pip",
+      "shengyue",
+      "weekly",
+      "hrbp-web",
+      "hr",
+      "shengyue-fengkong",
+      "shengyue-pip",
+      "shengyue-push",
+      "ziyang-demo",
+      "shengyue-fengkong-demo"
+    ]
+  },
+  {
+    "account": "ameng",
+    "s": "f1e749b708e1406e5f8df2dd09f89c0a",
+    "passwordHash": "d919434f8f427cce8cd198e52989c43b87f2520b22fd55334dea7bc04e0a0084",
+    "name": "ameng",
+    "dashboards": [
+      "ziyang",
+      "pip",
+      "shengyue",
+      "weekly",
+      "hrbp-web",
+      "hr",
+      "shengyue-fengkong",
+      "shengyue-pip",
+      "shengyue-push",
+      "ziyang-demo",
+      "shengyue-fengkong-demo"
+    ]
   }
 ]

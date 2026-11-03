@@ -17,7 +17,7 @@
 // 门户自动更新：检测 portal_version.json，版本不符则强制回源刷新（绕过 CDN/浏览器缓存，用户零操作）
 (function(){
   try {
-    var PORTAL_VERSION = "v44-20261103-1203";
+    var PORTAL_VERSION = "v45-20261103-1946";
     fetch('portal_version.json?_=' + Date.now(), {cache:'no-store'})
       .then(function(r){ return r.json(); })
       .then(function(d){
@@ -707,6 +707,20 @@ const USERS = [
     s: "8f7858978334775c2de978a24d108d1e", passwordHash: "c9eacfc7884f4a403e70d62fd93af18d30e61a996225734ab8362e89a5deb4bd",
     name: "ying",
     dashboards: ["ziyang", "shengyue", "pip", "shengyue-pip", "shengyue-fengkong"]
+  },
+  {
+    account: "mumu",
+    // SHA-256(salt + password)，salt 见同对象 s 字段
+    s: "b4ae6c65b0c27e82753b4e26c29f7efe", passwordHash: "8d78807cf80abbc32af51e423af78090742d00752bdb0a8d714863ce7f48dae3",
+    name: "mumu",
+    dashboards: ["ziyang", "pip", "shengyue", "weekly", "hrbp-web", "hr", "shengyue-fengkong", "shengyue-pip", "shengyue-push", "ziyang-demo", "shengyue-fengkong-demo"]
+  },
+  {
+    account: "ameng",
+    // SHA-256(salt + password)，salt 见同对象 s 字段
+    s: "f1e749b708e1406e5f8df2dd09f89c0a", passwordHash: "d919434f8f427cce8cd198e52989c43b87f2520b22fd55334dea7bc04e0a0084",
+    name: "ameng",
+    dashboards: ["ziyang", "pip", "shengyue", "weekly", "hrbp-web", "hr", "shengyue-fengkong", "shengyue-pip", "shengyue-push", "ziyang-demo", "shengyue-fengkong-demo"]
   }
   // 【新增用户示例】复制上面一段，修改 account/passwordHash/name/dashboards 即可
   // 生成方法：在浏览器控制台执行 await plHash("你的密码")，把返回的 s / h 分别填入
@@ -848,6 +862,7 @@ const PORTAL_LOG_KEY = "__PORTAL_LOGIN_LOG__";
 let plPermUnlocked = false;   // chengcheng 登录成功时自动置 true（对应梓洋「本人登录自动通过」）
 let plPermRows = [];          // 当前渲染的账号下标表（onclick 按下标取，避免注入）
 let plVersionRows = [
+  { v: "v45-20261103-1946", d: "2026-11-03", c: "新增登录账号 mumu / ameng（全 11 个看板权限，含门户）" },
   { v: "v44-20261103", d: "2026-11-03", c: "声乐PIP考核看板 sy-v2.5：声乐PIP考核看板 sy-v2.5 每日刷新 2026-11-03 11:40" },
   { v: "v43-20261102", d: "2026-11-02", c: "声乐PIP考核看板 sy-v2.5：声乐PIP考核看板 sy-v2.5 每日刷新 2026-11-02 08:33" },
   { v: "v42-20261101", d: "2026-11-01", c: "声乐PIP考核看板 sy-v2.5：声乐PIP考核看板 sy-v2.5 每日刷新 2026-11-01 16:14" },
