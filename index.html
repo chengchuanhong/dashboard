@@ -617,6 +617,16 @@ const DASHBOARDS = [
     date: "2026-11-02"
   },
   {
+    id: "shengyue-push",
+    title: "声乐数据—进度监控推送",
+    desc: "营期推送卡片：11:00 推过程 / 22:00 推结果双时点，④在营班长明细 ⑤小组差异 ⑥结营汇总，AI 总结结合过程数据与标杆参照",
+    icon: "📣",
+    iconColor: "#f97316",
+    url: "shengyue-push.html",
+    version: "v4.27",
+    date: "2026-11-03"
+  },
+  {
     id: "ziyang-demo",
     title: "梓洋L1数据分析看板（演示版）",
     desc: "演示复刻版：界面/交互/Tab 与正式看板一致，数据为随机生成的演示数据，不含真实业务信息",
@@ -661,14 +671,14 @@ const USERS = [
     // SHA-256(salt + password)，salt 见同对象 s 字段
     s: "8b348aef9df925e8d47bb8147bc912e7", passwordHash: "65fed6c65d9c1bb8c20f8c0b71bbe4ec857fefe75b12344c75b64f00e14167e1",
     name: "chengcheng",
-    dashboards: ["ziyang", "pip", "shengyue", "weekly", "hrbp-web", "hr", "shengyue-fengkong", "shengyue-pip", "ziyang-demo", "shengyue-fengkong-demo"]
+    dashboards: ["ziyang", "pip", "shengyue", "weekly", "hrbp-web", "hr", "shengyue-fengkong", "shengyue-pip", "ziyang-demo", "shengyue-fengkong-demo", "shengyue-push"]
   },
   {
     account: "yangnan",
     // SHA-256(salt + password)，salt 见同对象 s 字段
     s: "44a72694820ee5cb1cef534a46f14e13", passwordHash: "8d5d0471315d8f93cee31ca0072d038b8404de3484eb4a8f19b25cd620ca1928",
     name: "yangnan",
-    dashboards: ["ziyang", "pip", "shengyue", "weekly", "shengyue-fengkong", "shengyue-pip"]
+    dashboards: ["ziyang", "pip", "shengyue", "weekly", "shengyue-fengkong", "shengyue-pip", "shengyue-push"]
   },
   {
     account: "xiaoyingbing",
@@ -852,6 +862,7 @@ let plVersionRows = [
   { v: "v32-20261020", d: "2026-10-20", c: "声乐PIP考核看板 sy-v2.5：声乐PIP考核看板 sy-v2.5 每日刷新 2026-10-20 11:41" },
   { v: "v31-20261019", d: "2026-10-19", c: "声乐PIP考核看板 sy-v2.5：声乐PIP考核看板 sy-v2.5 每日刷新 2026-10-19 11:10" },
   { v: "v30-20261016", d: "2026-10-16", c: "声乐PIP考核看板 sy-v2.5：声乐PIP考核看板 sy-v2.5 每日刷新 2026-10-16 11:24" },
+  { v: "v30-20261103", d: "2026-11-03", c: "新增「声乐数据—进度监控推送」卡片（push-table v4.27，AES加密壳，口令 shengyue；chengcheng/yangnan 可见）；上线 shengyue-push.html" },
   { v: "v29-20261015", d: "2026-10-15", c: "声乐PIP考核看板 sy-v2.5：声乐PIP考核看板 sy-v2.5 每日刷新 2026-10-15 12:34" },
   { v: "v28-20261014", d: "2026-10-14", c: "门户新增 2 张演示版卡片（梓洋演示版 / 声乐风控演示版），仅 chengcheng 可见" },
   { v: "v27-20261014", d: "2026-10-14", c: "声乐PIP考核看板 sy-v2.5：声乐PIP考核看板 sy-v2.5 每日刷新 2026-10-14 11:41" },
