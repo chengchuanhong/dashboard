@@ -1,0 +1,120 @@
+[
+  {
+    "account": "chengcheng",
+    "s": "8b348aef9df925e8d47bb8147bc912e7",
+    "passwordHash": "65fed6c65d9c1bb8c20f8c0b71bbe4ec857fefe75b12344c75b64f00e14167e1",
+    "name": "chengcheng",
+    "dashboards": [
+      "ziyang",
+      "pip",
+      "shengyue",
+      "weekly",
+      "hrbp-web",
+      "hr",
+      "shengyue-fengkong",
+      "shengyue-pip",
+      "ziyang-demo",
+      "shengyue-fengkong-demo",
+      "shengyue-push"
+    ]
+  },
+  {
+    "account": "yangnan",
+    "s": "44a72694820ee5cb1cef534a46f14e13",
+    "passwordHash": "8d5d0471315d8f93cee31ca0072d038b8404de3484eb4a8f19b25cd620ca1928",
+    "name": "yangnan",
+    "dashboards": [
+      "ziyang",
+      "pip",
+      "shengyue",
+      "weekly",
+      "shengyue-fengkong",
+      "shengyue-pip",
+      "shengyue-push"
+    ]
+  },
+  {
+    "account": "xiaoyingbing",
+    "s": "99877253d32e8a698b903671864d658b",
+    "passwordHash": "6039365d36118f0ecfe68411d5ced01751a8d52f140dc318f39075ea474ae7b8",
+    "name": "xiaoyingbing",
+    "dashboards": [
+      "shengyue",
+      "shengyue-fengkong",
+      "shengyue-pip"
+    ]
+  },
+  {
+    "account": "zhaochunhong",
+    "s": "b4e3252b36471f9c140da9547f884e62",
+    "passwordHash": "485d93026b6a58d5991ece7dfd4c7f021e6a4edd03869c8c3bd3da2ec297bbbd",
+    "name": "zhaochunhong",
+    "dashboards": [
+      "shengyue",
+      "shengyue-fengkong",
+      "weekly",
+      "shengyue-pip"
+    ]
+  },
+  {
+    "account": "zhoutong",
+    "s": "707474c54625486e71f238eb314bc2ea",
+    "passwordHash": "2869def6037491cc3adf01f1e7a4e4b1880c919f631c983c8b0e0a1de973f757",
+    "name": "zhoutong",
+    "dashboards": [
+      "shengyue",
+      "shengyue-pip"
+    ]
+  },
+  {
+    "account": "ying",
+    "s": "8f7858978334775c2de978a24d108d1e",
+    "passwordHash": "c9eacfc7884f4a403e70d62fd93af18d30e61a996225734ab8362e89a5deb4bd",
+    "name": "ying",
+    "dashboards": [
+      "ziyang",
+      "shengyue",
+      "pip",
+      "shengyue-pip",
+      "shengyue-fengkong"
+    ]
+  },
+  {
+    "account": "mumu",
+    "s": "b4ae6c65b0c27e82753b4e26c29f7efe",
+    "passwordHash": "8d78807cf80abbc32af51e423af78090742d00752bdb0a8d714863ce7f48dae3",
+    "name": "mumu",
+    "dashboards": [
+      "ziyang",
+      "pip",
+      "shengyue",
+      "weekly",
+      "hrbp-web",
+      "hr",
+      "shengyue-fengkong",
+      "shengyue-pip",
+      "shengyue-push",
+      "ziyang-demo",
+      "shengyue-fengkong-demo"
+    ]
+  },
+  {
+    "account": "ameng",
+    "s": "f1e749b708e1406e5f8df2dd09f89c0a",
+    "passwordHash": "d919434f8f427cce8cd198e52989c43b87f2520b22fd55334dea7bc04e0a0084",
+    "name": "ameng",
+    "dashboards": [
+      "ziyang",
+      "pip",
+      "shengyue",
+      "weekly",
+      "hrbp-web",
+      "hr",
+      "shengyue-fengkong",
+      "shengyue-pip",
+      "shengyue-push",
+      "ziyang-demo",
+      "shengyue-fengkong-demo"
+    ]
+  }
+]
